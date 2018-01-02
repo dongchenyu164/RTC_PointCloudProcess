@@ -116,16 +116,32 @@ char* ComPcProcessSVC_impl::Capture_PointClould(const ::ComPcProcess::Matrix4_4 
 	for(int i = 0;i < 4;i++)
 		for(int j = 0;j < 4;j++)
 			std::cout << TransformData[i][j] << std::endl;
+	return const_cast<char*>("Success!\n");
 }
 
 char* ComPcProcessSVC_impl::SwitchSysMode(const char* ModeStr)
 {
-	string str = string(ModeStr);
+	string str = ModeStr;
 	std::cout << str << std::endl;
-	return str.c_str();
+	return const_cast<char*>(str.c_str());
 }
 
 char* ComPcProcessSVC_impl::Clear_QueueAndPoints()
 {
+	string str = "ModeStr";
+	std::cout << str << std::endl;
+	return const_cast<char*>(str.c_str());
+}
 
+ComPcProcess::CupInfo_slice* ComPcProcessSVC_impl::GetCupInfo()
+{
+	ComPcProcess::CupInfo Res;
+
+	for(int i = 0;i < 7;i++)
+		ComPcProcessSVC_impl::Result_CupInfo[i] = i * 3;
+	for(int i = 0;i < 5;i++)
+		for(int j = 0;j < 7;j++)
+			Res[i][j] = (CORBA::Double)(i * 7 + j);
+
+	return Res;
 }

@@ -18,6 +18,7 @@
 //**Edit by Dong.
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 #include "Define.h"
+#include <mutex>
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 //**Edit by Dong. (END)
 //*******************************************************
@@ -65,6 +66,7 @@ public:
 	char* Capture_PointClould(const ::ComPcProcess::Matrix4_4 TransformData);
 	char* SwitchSysMode(const char* ModeStr);
 	char* Clear_QueueAndPoints();
+	ComPcProcess::CupInfo_slice* GetCupInfo();
 
 private:
 	enum PointCloudProcessMode{Capture, Process};
@@ -76,8 +78,9 @@ private:
 	std::queue<Eigen::Matrix4f> queue_TransformData;//被捕获的点云的位姿矩阵。
 	std::mutex QueueMutex;
 
+	ComPcProcess::CupInfo_slice Result_CupInfo;
 
-	void Transform_PointCloud()//应该在OnExecute函数内，在 拍摄 模式时，每周期调用。
+	void Transform_PointCloud();//应该在OnExecute函数内，在 拍摄 模式时，每周期调用。
 
 public:
 
