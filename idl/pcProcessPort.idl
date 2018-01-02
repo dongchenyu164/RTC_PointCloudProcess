@@ -7,6 +7,8 @@ interface ComPcProcess
 	boolean save_pointCloud(in string str);
 	
 	typedef double Matrix4_4[4][4];
+	typedef double CupInfo[5][3+3+1];
+	CupInfo GetCupInfo();
 	string Capture_PointClould(in Matrix4_4 TransformData);
 	string Clear_QueueAndPoints();
 	string SwitchSysMode(in string ModeStr);

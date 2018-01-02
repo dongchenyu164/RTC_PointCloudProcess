@@ -120,7 +120,9 @@ char* ComPcProcessSVC_impl::Capture_PointClould(const ::ComPcProcess::Matrix4_4 
 
 char* ComPcProcessSVC_impl::SwitchSysMode(const char* ModeStr)
 {
-
+	string str = string(ModeStr);
+	std::cout << str << std::endl;
+	return str.c_str();
 }
 
 char* ComPcProcessSVC_impl::Clear_QueueAndPoints()

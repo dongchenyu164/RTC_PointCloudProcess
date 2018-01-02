@@ -48,9 +48,6 @@ src/pcProcessLib.cpp
 src/pcProcessPortSVC_impl.cpp
 src/RTC_PointCloudProcess.cpp
 src/RTC_PointCloudProcessComp.cpp
-../../../RTC_PointCloud_Functions/Define.h
-../../../RTC_PointCloud_Functions/Define.h
-../../../RTC_PointCloud_Functions/Define.h
 CMakeFiles/2.8.12.2/CompilerIdC/CMakeCCompilerId.c
 CMakeFiles/2.8.12.2/CompilerIdCXX/CMakeCXXCompilerId.cpp
 CMakeFiles/3.5.1/CompilerIdC/CMakeCCompilerId.c
@@ -101,8 +98,9 @@ src/pcProcessLib.cpp
 src/pcProcessPortSVC_impl.cpp
 src/RTC_PointCloudProcess.cpp
 src/RTC_PointCloudProcessComp.cpp
-../../../RTC_PointCloud_Functions/Visualizer.h
-../../../RTC_PointCloud_Functions/Functions.h
-../../../RTC_PointCloud_Functions/ThreadPool.h
-../../../RTC_PointCloud_Functions/Visualizer.cpp
-../../../RTC_PointCloud_Functions/Functions.cpp
+include/RTC_PointCloudProcess/Define.h
+include/RTC_PointCloudProcess/Functions.h
+include/RTC_PointCloudProcess/ThreadPool.h
+include/RTC_PointCloudProcess/Visualizer.h
+src/Visualizer.cpp
+src/Functions.cpp

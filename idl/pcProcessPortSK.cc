@@ -258,12 +258,86 @@ _0RL_lcfn_a93046d6d953ea9d_30000000(omniCallDescriptor* cd, omniServant* svnt)
 
 }
 // Proxy call descriptor class. Mangled signature:
-//  _cstring_i_a4_a4_cdouble
+//  _a5_a7_cdouble
 class _0RL_cd_a93046d6d953ea9d_40000000
   : public omniCallDescriptor
 {
 public:
   inline _0RL_cd_a93046d6d953ea9d_40000000(LocalCallFn lcfn,const char* op_,size_t oplen,_CORBA_Boolean upcall=0):
+     omniCallDescriptor(lcfn, op_, oplen, 0, _user_exns, 0, upcall)
+  {
+    
+  }
+  
+  
+  void unmarshalReturnedValues(cdrStream&);
+  void marshalReturnedValues(cdrStream&);
+  
+  
+  static const char* const _user_exns[];
+
+  ComPcProcess::CupInfo_var result;
+};
+
+void _0RL_cd_a93046d6d953ea9d_40000000::marshalReturnedValues(cdrStream& _n)
+{
+  
+#ifndef OMNI_MIXED_ENDIAN_DOUBLE
+  if (! _n.marshal_byte_swap()) {
+    _n.put_octet_array((_CORBA_Octet*)((ComPcProcess::CupInfo_slice*)result),280,omni::ALIGN_8);
+  }
+  else 
+#endif
+  {
+    _n.declareArrayLength(omni::ALIGN_8, 280);
+    for (_CORBA_ULong _0i0 = 0; _0i0 < 5; _0i0++){
+      for (_CORBA_ULong _0i1 = 0; _0i1 < 7; _0i1++){
+        result[_0i0][_0i1] >>= _n;
+      }
+    }
+  }
+
+}
+
+void _0RL_cd_a93046d6d953ea9d_40000000::unmarshalReturnedValues(cdrStream& _n)
+{
+  result = ComPcProcess::CupInfo_alloc();
+  _n.unmarshalArrayDouble((_CORBA_Double*)((ComPcProcess::CupInfo_slice*)result), 35);
+
+}
+
+const char* const _0RL_cd_a93046d6d953ea9d_40000000::_user_exns[] = {
+  0
+};
+
+// Local call call-back function.
+static void
+_0RL_lcfn_a93046d6d953ea9d_50000000(omniCallDescriptor* cd, omniServant* svnt)
+{
+  _0RL_cd_a93046d6d953ea9d_40000000* tcd = (_0RL_cd_a93046d6d953ea9d_40000000*)cd;
+  _impl_ComPcProcess* impl = (_impl_ComPcProcess*) svnt->_ptrToInterface(ComPcProcess::_PD_repoId);
+  tcd->result = impl->GetCupInfo();
+
+
+}
+
+ComPcProcess::CupInfo_slice* _objref_ComPcProcess::GetCupInfo()
+{
+  _0RL_cd_a93046d6d953ea9d_40000000 _call_desc(_0RL_lcfn_a93046d6d953ea9d_50000000, "GetCupInfo", 11);
+
+
+  _invoke(_call_desc);
+  return _call_desc.result._retn();
+
+
+}
+// Proxy call descriptor class. Mangled signature:
+//  _cstring_i_a4_a4_cdouble
+class _0RL_cd_a93046d6d953ea9d_60000000
+  : public omniCallDescriptor
+{
+public:
+  inline _0RL_cd_a93046d6d953ea9d_60000000(LocalCallFn lcfn,const char* op_,size_t oplen,_CORBA_Boolean upcall=0):
      omniCallDescriptor(lcfn, op_, oplen, 0, _user_exns, 0, upcall)
   {
     
@@ -283,7 +357,7 @@ public:
   ::CORBA::String_var result;
 };
 
-void _0RL_cd_a93046d6d953ea9d_40000000::marshalArguments(cdrStream& _n)
+void _0RL_cd_a93046d6d953ea9d_60000000::marshalArguments(cdrStream& _n)
 {
   
 #ifndef OMNI_MIXED_ENDIAN_DOUBLE
@@ -303,71 +377,12 @@ void _0RL_cd_a93046d6d953ea9d_40000000::marshalArguments(cdrStream& _n)
 
 }
 
-void _0RL_cd_a93046d6d953ea9d_40000000::unmarshalArguments(cdrStream& _n)
+void _0RL_cd_a93046d6d953ea9d_60000000::unmarshalArguments(cdrStream& _n)
 {
   _n.unmarshalArrayDouble((_CORBA_Double*)((ComPcProcess::Matrix4_4_slice*)arg_0_), 16);
   arg_0 = &arg_0_[0];
 
 }
-
-void _0RL_cd_a93046d6d953ea9d_40000000::marshalReturnedValues(cdrStream& _n)
-{
-  _n.marshalString(result,0);
-
-}
-
-void _0RL_cd_a93046d6d953ea9d_40000000::unmarshalReturnedValues(cdrStream& _n)
-{
-  result = _n.unmarshalString(0);
-
-}
-
-const char* const _0RL_cd_a93046d6d953ea9d_40000000::_user_exns[] = {
-  0
-};
-
-// Local call call-back function.
-static void
-_0RL_lcfn_a93046d6d953ea9d_50000000(omniCallDescriptor* cd, omniServant* svnt)
-{
-  _0RL_cd_a93046d6d953ea9d_40000000* tcd = (_0RL_cd_a93046d6d953ea9d_40000000*)cd;
-  _impl_ComPcProcess* impl = (_impl_ComPcProcess*) svnt->_ptrToInterface(ComPcProcess::_PD_repoId);
-  tcd->result = impl->Capture_PointClould(tcd->arg_0);
-
-
-}
-
-char* _objref_ComPcProcess::Capture_PointClould(const ::ComPcProcess::Matrix4_4 TransformData)
-{
-  _0RL_cd_a93046d6d953ea9d_40000000 _call_desc(_0RL_lcfn_a93046d6d953ea9d_50000000, "Capture_PointClould", 20);
-  _call_desc.arg_0 = &TransformData[0];
-
-  _invoke(_call_desc);
-  return _call_desc.result._retn();
-
-
-}
-// Proxy call descriptor class. Mangled signature:
-//  _cstring
-class _0RL_cd_a93046d6d953ea9d_60000000
-  : public omniCallDescriptor
-{
-public:
-  inline _0RL_cd_a93046d6d953ea9d_60000000(LocalCallFn lcfn,const char* op_,size_t oplen,_CORBA_Boolean upcall=0):
-     omniCallDescriptor(lcfn, op_, oplen, 0, _user_exns, 0, upcall)
-  {
-    
-  }
-  
-  
-  void unmarshalReturnedValues(cdrStream&);
-  void marshalReturnedValues(cdrStream&);
-  
-  
-  static const char* const _user_exns[];
-
-  ::CORBA::String_var result;
-};
 
 void _0RL_cd_a93046d6d953ea9d_60000000::marshalReturnedValues(cdrStream& _n)
 {
@@ -391,15 +406,15 @@ _0RL_lcfn_a93046d6d953ea9d_70000000(omniCallDescriptor* cd, omniServant* svnt)
 {
   _0RL_cd_a93046d6d953ea9d_60000000* tcd = (_0RL_cd_a93046d6d953ea9d_60000000*)cd;
   _impl_ComPcProcess* impl = (_impl_ComPcProcess*) svnt->_ptrToInterface(ComPcProcess::_PD_repoId);
-  tcd->result = impl->Clear_QueueAndPoints();
+  tcd->result = impl->Capture_PointClould(tcd->arg_0);
 
 
 }
 
-char* _objref_ComPcProcess::Clear_QueueAndPoints()
+char* _objref_ComPcProcess::Capture_PointClould(const ::ComPcProcess::Matrix4_4 TransformData)
 {
-  _0RL_cd_a93046d6d953ea9d_60000000 _call_desc(_0RL_lcfn_a93046d6d953ea9d_70000000, "Clear_QueueAndPoints", 21);
-
+  _0RL_cd_a93046d6d953ea9d_60000000 _call_desc(_0RL_lcfn_a93046d6d953ea9d_70000000, "Capture_PointClould", 20);
+  _call_desc.arg_0 = &TransformData[0];
 
   _invoke(_call_desc);
   return _call_desc.result._retn();
@@ -407,7 +422,7 @@ char* _objref_ComPcProcess::Clear_QueueAndPoints()
 
 }
 // Proxy call descriptor class. Mangled signature:
-//  _cstring_i_cstring
+//  _cstring
 class _0RL_cd_a93046d6d953ea9d_80000000
   : public omniCallDescriptor
 {
@@ -418,32 +433,15 @@ public:
     
   }
   
-  void marshalArguments(cdrStream&);
-  void unmarshalArguments(cdrStream&);
-
+  
   void unmarshalReturnedValues(cdrStream&);
   void marshalReturnedValues(cdrStream&);
   
   
   static const char* const _user_exns[];
 
-  ::CORBA::String_var arg_0_;
-  const char* arg_0;
   ::CORBA::String_var result;
 };
-
-void _0RL_cd_a93046d6d953ea9d_80000000::marshalArguments(cdrStream& _n)
-{
-  _n.marshalString(arg_0,0);
-
-}
-
-void _0RL_cd_a93046d6d953ea9d_80000000::unmarshalArguments(cdrStream& _n)
-{
-  arg_0_ = _n.unmarshalString(0);
-  arg_0 = arg_0_.in();
-
-}
 
 void _0RL_cd_a93046d6d953ea9d_80000000::marshalReturnedValues(cdrStream& _n)
 {
@@ -467,6 +465,82 @@ _0RL_lcfn_a93046d6d953ea9d_90000000(omniCallDescriptor* cd, omniServant* svnt)
 {
   _0RL_cd_a93046d6d953ea9d_80000000* tcd = (_0RL_cd_a93046d6d953ea9d_80000000*)cd;
   _impl_ComPcProcess* impl = (_impl_ComPcProcess*) svnt->_ptrToInterface(ComPcProcess::_PD_repoId);
+  tcd->result = impl->Clear_QueueAndPoints();
+
+
+}
+
+char* _objref_ComPcProcess::Clear_QueueAndPoints()
+{
+  _0RL_cd_a93046d6d953ea9d_80000000 _call_desc(_0RL_lcfn_a93046d6d953ea9d_90000000, "Clear_QueueAndPoints", 21);
+
+
+  _invoke(_call_desc);
+  return _call_desc.result._retn();
+
+
+}
+// Proxy call descriptor class. Mangled signature:
+//  _cstring_i_cstring
+class _0RL_cd_a93046d6d953ea9d_a0000000
+  : public omniCallDescriptor
+{
+public:
+  inline _0RL_cd_a93046d6d953ea9d_a0000000(LocalCallFn lcfn,const char* op_,size_t oplen,_CORBA_Boolean upcall=0):
+     omniCallDescriptor(lcfn, op_, oplen, 0, _user_exns, 0, upcall)
+  {
+    
+  }
+  
+  void marshalArguments(cdrStream&);
+  void unmarshalArguments(cdrStream&);
+
+  void unmarshalReturnedValues(cdrStream&);
+  void marshalReturnedValues(cdrStream&);
+  
+  
+  static const char* const _user_exns[];
+
+  ::CORBA::String_var arg_0_;
+  const char* arg_0;
+  ::CORBA::String_var result;
+};
+
+void _0RL_cd_a93046d6d953ea9d_a0000000::marshalArguments(cdrStream& _n)
+{
+  _n.marshalString(arg_0,0);
+
+}
+
+void _0RL_cd_a93046d6d953ea9d_a0000000::unmarshalArguments(cdrStream& _n)
+{
+  arg_0_ = _n.unmarshalString(0);
+  arg_0 = arg_0_.in();
+
+}
+
+void _0RL_cd_a93046d6d953ea9d_a0000000::marshalReturnedValues(cdrStream& _n)
+{
+  _n.marshalString(result,0);
+
+}
+
+void _0RL_cd_a93046d6d953ea9d_a0000000::unmarshalReturnedValues(cdrStream& _n)
+{
+  result = _n.unmarshalString(0);
+
+}
+
+const char* const _0RL_cd_a93046d6d953ea9d_a0000000::_user_exns[] = {
+  0
+};
+
+// Local call call-back function.
+static void
+_0RL_lcfn_a93046d6d953ea9d_b0000000(omniCallDescriptor* cd, omniServant* svnt)
+{
+  _0RL_cd_a93046d6d953ea9d_a0000000* tcd = (_0RL_cd_a93046d6d953ea9d_a0000000*)cd;
+  _impl_ComPcProcess* impl = (_impl_ComPcProcess*) svnt->_ptrToInterface(ComPcProcess::_PD_repoId);
   tcd->result = impl->SwitchSysMode(tcd->arg_0);
 
 
@@ -474,7 +548,7 @@ _0RL_lcfn_a93046d6d953ea9d_90000000(omniCallDescriptor* cd, omniServant* svnt)
 
 char* _objref_ComPcProcess::SwitchSysMode(const char* ModeStr)
 {
-  _0RL_cd_a93046d6d953ea9d_80000000 _call_desc(_0RL_lcfn_a93046d6d953ea9d_90000000, "SwitchSysMode", 14);
+  _0RL_cd_a93046d6d953ea9d_a0000000 _call_desc(_0RL_lcfn_a93046d6d953ea9d_b0000000, "SwitchSysMode", 14);
   _call_desc.arg_0 = ModeStr;
 
   _invoke(_call_desc);
@@ -527,9 +601,17 @@ _impl_ComPcProcess::_dispatch(omniCallHandle& _handle)
     return 1;
   }
 
+  if( omni::strMatch(op, "GetCupInfo") ) {
+
+    _0RL_cd_a93046d6d953ea9d_40000000 _call_desc(_0RL_lcfn_a93046d6d953ea9d_50000000, "GetCupInfo", 11, 1);
+    
+    _handle.upcall(this,_call_desc);
+    return 1;
+  }
+
   if( omni::strMatch(op, "Capture_PointClould") ) {
 
-    _0RL_cd_a93046d6d953ea9d_40000000 _call_desc(_0RL_lcfn_a93046d6d953ea9d_50000000, "Capture_PointClould", 20, 1);
+    _0RL_cd_a93046d6d953ea9d_60000000 _call_desc(_0RL_lcfn_a93046d6d953ea9d_70000000, "Capture_PointClould", 20, 1);
     
     _handle.upcall(this,_call_desc);
     return 1;
@@ -537,7 +619,7 @@ _impl_ComPcProcess::_dispatch(omniCallHandle& _handle)
 
   if( omni::strMatch(op, "Clear_QueueAndPoints") ) {
 
-    _0RL_cd_a93046d6d953ea9d_60000000 _call_desc(_0RL_lcfn_a93046d6d953ea9d_70000000, "Clear_QueueAndPoints", 21, 1);
+    _0RL_cd_a93046d6d953ea9d_80000000 _call_desc(_0RL_lcfn_a93046d6d953ea9d_90000000, "Clear_QueueAndPoints", 21, 1);
     
     _handle.upcall(this,_call_desc);
     return 1;
@@ -545,7 +627,7 @@ _impl_ComPcProcess::_dispatch(omniCallHandle& _handle)
 
   if( omni::strMatch(op, "SwitchSysMode") ) {
 
-    _0RL_cd_a93046d6d953ea9d_80000000 _call_desc(_0RL_lcfn_a93046d6d953ea9d_90000000, "SwitchSysMode", 14, 1);
+    _0RL_cd_a93046d6d953ea9d_a0000000 _call_desc(_0RL_lcfn_a93046d6d953ea9d_b0000000, "SwitchSysMode", 14, 1);
     
     _handle.upcall(this,_call_desc);
     return 1;

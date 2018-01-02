@@ -13,6 +13,11 @@ static CORBA::TypeCode_ptr _0RL_tc_ComPcProcess_mMatrix4__4 = CORBA::TypeCode::P
 
 const CORBA::TypeCode_ptr ComPcProcess::_tc_Matrix4_4 = _0RL_tc_ComPcProcess_mMatrix4__4;
 
+static CORBA::TypeCode_ptr _0RL_tc_ComPcProcess_mCupInfo = CORBA::TypeCode::PR_alias_tc("IDL:ComPcProcess/CupInfo:1.0", "CupInfo", CORBA::TypeCode::PR_array_tc(5, CORBA::TypeCode::PR_array_tc(7, CORBA::TypeCode::PR_double_tc(), &_0RL_tcTrack), &_0RL_tcTrack), &_0RL_tcTrack);
+
+
+const CORBA::TypeCode_ptr ComPcProcess::_tc_CupInfo = _0RL_tc_ComPcProcess_mCupInfo;
+
 const CORBA::TypeCode_ptr _tc_ComPcProcess = CORBA::TypeCode::PR_interface_tc("IDL:ComPcProcess:1.0", "ComPcProcess", &_0RL_tcTrack);
 
 static void _0RL_ComPcProcess_mMatrix4__4_marshal_fn(cdrStream& _s, void* _v)
@@ -70,6 +75,66 @@ void operator<<=(::CORBA::Any& _a, const ComPcProcess::Matrix4_4_forany& _s)
                     _0RL_ComPcProcess_mMatrix4__4_destructor_fn,
                     _v)) {
     _s = (ComPcProcess::Matrix4_4_slice*)_v;
+    return 1;
+  }
+  return 0;
+}
+
+static void _0RL_ComPcProcess_mCupInfo_marshal_fn(cdrStream& _s, void* _v)
+{
+  ComPcProcess::CupInfo_slice* _a = (ComPcProcess::CupInfo_slice*)_v;
+  
+#ifndef OMNI_MIXED_ENDIAN_DOUBLE
+  if (! _s.marshal_byte_swap()) {
+    _s.put_octet_array((_CORBA_Octet*)(_a),280,omni::ALIGN_8);
+  }
+  else 
+#endif
+  {
+    _s.declareArrayLength(omni::ALIGN_8, 280);
+    for (_CORBA_ULong _0i0 = 0; _0i0 < 5; _0i0++){
+      for (_CORBA_ULong _0i1 = 0; _0i1 < 7; _0i1++){
+        _a[_0i0][_0i1] >>= _s;
+      }
+    }
+  }
+
+}
+static void _0RL_ComPcProcess_mCupInfo_unmarshal_fn(cdrStream& _s, void*& _v)
+{
+  ComPcProcess::CupInfo_slice* _a = ComPcProcess::CupInfo_alloc();
+  _s.unmarshalArrayDouble((_CORBA_Double*)(_a), 35);
+
+  _v = _a;
+}
+static void _0RL_ComPcProcess_mCupInfo_destructor_fn(void* _v)
+{
+  ComPcProcess::CupInfo_slice* _a = (ComPcProcess::CupInfo_slice*)_v;
+  ComPcProcess::CupInfo_free(_a);
+}
+
+void operator<<=(::CORBA::Any& _a, const ComPcProcess::CupInfo_forany& _s)
+{
+  ComPcProcess::CupInfo_slice* _v;
+  if (!_s.NP_nocopy())
+    _v = ComPcProcess::CupInfo_dup(_s);
+  else
+    _v = _s.NP_getSlice();
+
+  _a.PR_insert(_0RL_tc_ComPcProcess_mCupInfo,
+               _0RL_ComPcProcess_mCupInfo_marshal_fn,
+               _0RL_ComPcProcess_mCupInfo_destructor_fn,
+               _v);
+}
+::CORBA::Boolean operator>>=(const ::CORBA::Any& _a, ComPcProcess::CupInfo_forany& _s)
+{
+  void* _v;
+  if (_a.PR_extract(_0RL_tc_ComPcProcess_mCupInfo,
+                    _0RL_ComPcProcess_mCupInfo_unmarshal_fn,
+                    _0RL_ComPcProcess_mCupInfo_marshal_fn,
+                    _0RL_ComPcProcess_mCupInfo_destructor_fn,
+                    _v)) {
+    _s = (ComPcProcess::CupInfo_slice*)_v;
     return 1;
   }
   return 0;

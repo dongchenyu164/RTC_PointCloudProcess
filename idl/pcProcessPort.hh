@@ -171,6 +171,58 @@ public:
 
   typedef Matrix4_4_slice* Matrix4_4_out;
 
+  static _dyn_attr const ::CORBA::TypeCode_ptr _tc_CupInfo;
+
+  typedef ::CORBA::Double CupInfo[5][7];
+  typedef ::CORBA::Double CupInfo_slice[7];
+
+  static inline CupInfo_slice* CupInfo_alloc() {
+    return new CupInfo_slice[5];
+  }
+
+  static inline CupInfo_slice* CupInfo_dup(const CupInfo_slice* _s) {
+    if (!_s) return 0;
+    CupInfo_slice* _data = CupInfo_alloc();
+    if (_data) {
+      for (_CORBA_ULong _0i0 = 0; _0i0 < 5; _0i0++){
+        for (_CORBA_ULong _0i1 = 0; _0i1 < 7; _0i1++){
+          
+          _data[_0i0][_0i1] = _s[_0i0][_0i1];
+
+        }
+      }
+  
+    }
+    return _data;
+  }
+
+  static inline void CupInfo_copy(CupInfo_slice* _to, const CupInfo_slice* _from){
+    for (_CORBA_ULong _0i0 = 0; _0i0 < 5; _0i0++){
+      for (_CORBA_ULong _0i1 = 0; _0i1 < 7; _0i1++){
+        
+        _to[_0i0][_0i1] = _from[_0i0][_0i1];
+
+      }
+    }
+  
+  }
+
+  static inline void CupInfo_free(CupInfo_slice* _s) {
+    delete [] _s;
+  }
+
+  class CupInfo_copyHelper {
+  public:
+    static inline CupInfo_slice* alloc() { return ::ComPcProcess::CupInfo_alloc(); }
+    static inline CupInfo_slice* dup(const CupInfo_slice* p) { return ::ComPcProcess::CupInfo_dup(p); }
+    static inline void free(CupInfo_slice* p) { ::ComPcProcess::CupInfo_free(p); }
+  };
+
+  typedef _CORBA_Array_Fix_Var<CupInfo_copyHelper,CupInfo_slice> CupInfo_var;
+  typedef _CORBA_Array_Fix_Forany<CupInfo_copyHelper,CupInfo_slice> CupInfo_forany;
+
+  typedef CupInfo_slice* CupInfo_out;
+
 
 };
 
@@ -181,6 +233,7 @@ class _objref_ComPcProcess :
 public:
   RTC::PointCloud* get_pointCloud(::CORBA::Boolean& flag);
   ::CORBA::Boolean save_pointCloud(const char* str);
+  ComPcProcess::CupInfo_slice* GetCupInfo();
   char* Capture_PointClould(const ::ComPcProcess::Matrix4_4 TransformData);
   char* Clear_QueueAndPoints();
   char* SwitchSysMode(const char* ModeStr);
@@ -219,6 +272,7 @@ public:
 
   virtual RTC::PointCloud* get_pointCloud(::CORBA::Boolean& flag) = 0;
   virtual ::CORBA::Boolean save_pointCloud(const char* str) = 0;
+  virtual ComPcProcess::CupInfo_slice* GetCupInfo() = 0;
   virtual char* Capture_PointClould(const ::ComPcProcess::Matrix4_4 TransformData) = 0;
   virtual char* Clear_QueueAndPoints() = 0;
   virtual char* SwitchSysMode(const char* ModeStr) = 0;
@@ -260,6 +314,9 @@ public:
 
 void operator<<=(::CORBA::Any& _a, const ComPcProcess::Matrix4_4_forany& _s);
 _CORBA_Boolean operator>>=(const ::CORBA::Any& _a, ComPcProcess::Matrix4_4_forany& _s);
+
+void operator<<=(::CORBA::Any& _a, const ComPcProcess::CupInfo_forany& _s);
+_CORBA_Boolean operator>>=(const ::CORBA::Any& _a, ComPcProcess::CupInfo_forany& _s);
 
 void operator<<=(::CORBA::Any& _a, ComPcProcess_ptr _s);
 void operator<<=(::CORBA::Any& _a, ComPcProcess_ptr* _s);
