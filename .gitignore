@@ -1,0 +1,33 @@
+.gitignore~
+.cmake
+/CMakeFiles/
+/.settings/
+/cmake/
+/doc/
+/*
+
+#idl folder
+/idl/*
+!/idl/*.cc
+!/idl/*.idl
+!/idl/*.hh
+!/idl/*.h
+
+#include folder
+/include/*
+!/include/RTC_PointCloudProcess/
+/include/RTC_PointCloudProcess/*
+!/include/RTC_PointCloudProcess/*.h
+
+#/src/
+/src/*
+!/src/*.cpp
+
+#Root
+!/CMakeLists.txt
+!.gitignore
+!RTC_PointCloudProcess.config
+!RTC_PointCloudProcess.creator
+!RTC_PointCloudProcess.creator.user
+!RTC_PointCloudProcess.files
+!RTC_PointCloudProcess.includes

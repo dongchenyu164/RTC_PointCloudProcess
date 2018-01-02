@@ -1,0 +1,15 @@
+
+#include <InterfaceDataTypes.idl>
+
+interface ComPcProcess
+{
+	RTC::PointCloud get_pointCloud(out boolean flag);
+	boolean save_pointCloud(in string str);
+	
+	typedef double Matrix4_4[4][4];
+	string Capture_PointClould(in Matrix4_4 TransformData);
+	string Clear_QueueAndPoints();
+	string SwitchSysMode(in string ModeStr);
+};
+	
+
