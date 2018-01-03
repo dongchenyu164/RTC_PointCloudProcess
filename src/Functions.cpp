@@ -2,130 +2,130 @@
 #include <queue>
 #include <mutex>
 
-//滤波处理
-enum PointCloudProcessMode{Capture, Process};
-//先是数据读入状态，接收【当前机械臂位姿】信号
-//bool isBusy = false;//是否正在处理点云。
-PointCloudProcessMode SystemMode = Capture;
+////滤波处理
+//enum PointCloudProcessMode{Capture, Process};
+////先是数据读入状态，接收【当前机械臂位姿】信号
+////bool isBusy = false;//是否正在处理点云。
+//PointCloudProcessMode SystemMode = Capture;
 
-PCXYZ_Ptr PointsOfTable(new PCXYZ);//合成后的桌子的点云。
-std::queue<PCXYZ_Ptr> queue_PointsOfCapture;//被捕获的点云的存放队列。
-std::queue<Eigen::Matrix4f> queue_TransformData;//被捕获的点云的位姿矩阵。
-std::mutex QueueMutex;
-// 作为主动触发的函数
-std::string Capture_PointClould(double TransformData[4][4])/****RTM****/
-{
-	PCXYZ_Ptr DataIn = PCXYZ_Ptr(new PCXYZ());//到时候换成RTM点云输入变量。
+//PCXYZ_Ptr PointsOfTable(new PCXYZ);//合成后的桌子的点云。
+//std::queue<PCXYZ_Ptr> queue_PointsOfCapture;//被捕获的点云的存放队列。
+//std::queue<Eigen::Matrix4f> queue_TransformData;//被捕获的点云的位姿矩阵。
+//std::mutex QueueMutex;
+//// 作为主动触发的函数
+//std::string Capture_PointClould(double TransformData[4][4])/****RTM****/
+//{
+//	PCXYZ_Ptr DataIn = PCXYZ_Ptr(new PCXYZ());//到时候换成RTM点云输入变量。
 
-	if (!QueueMutex.try_lock())
-		std::cout << "Processing!" << std::endl;
-	while (!QueueMutex.try_lock());
-	//isBusy = true;
+//	if (!QueueMutex.try_lock())
+//		std::cout << "Processing!" << std::endl;
+//	while (!QueueMutex.try_lock());
+//	//isBusy = true;
 
-	queue_PointsOfCapture.push(DataIn);
-	queue_TransformData.push(MakeTransformMatrix(TransformData));
+//	queue_PointsOfCapture.push(DataIn);
+//	queue_TransformData.push(MakeTransformMatrix(TransformData));
 
-	QueueMutex.unlock();
+//	QueueMutex.unlock();
 
-	return "Capture_PointClould() Success!";
-}
+//	return "Capture_PointClould() Success!";
+//}
 
-//应该在OnExecute函数内，在 拍摄 模式时，每周期调用。
-void Transform_PointCloud()
-{
-	if (SystemMode != Capture)
-		return;
+////应该在OnExecute函数内，在 拍摄 模式时，每周期调用。
+//void Transform_PointCloud()
+//{
+//	if (SystemMode != Capture)
+//		return;
 
-	if (!QueueMutex.try_lock())
-		return;
-	//isBusy = true;//防止队列（在RTM中）的多线程调用冲突。
+//	if (!QueueMutex.try_lock())
+//		return;
+//	//isBusy = true;//防止队列（在RTM中）的多线程调用冲突。
 
-	if (queue_PointsOfCapture.empty() || queue_TransformData.empty())
-	{
-		QueueMutex.unlock();
-		return;
-	}
+//	if (queue_PointsOfCapture.empty() || queue_TransformData.empty())
+//	{
+//		QueueMutex.unlock();
+//		return;
+//	}
 
-	PCXYZ_Ptr tmp(new PCXYZ);
-	PCXYZ_Ptr tmp2(new PCXYZ);
-	PCXYZ_Ptr tmp3(new PCXYZ);
+//	PCXYZ_Ptr tmp(new PCXYZ);
+//	PCXYZ_Ptr tmp2(new PCXYZ);
+//	PCXYZ_Ptr tmp3(new PCXYZ);
 
-	pcl::transformPointCloud(*queue_PointsOfCapture.front(), *tmp, queue_TransformData.front());
+//	pcl::transformPointCloud(*queue_PointsOfCapture.front(), *tmp, queue_TransformData.front());
 
-	//调用完后弹出队列
-	queue_PointsOfCapture.pop();
-	queue_TransformData.pop();
+//	//调用完后弹出队列
+//	queue_PointsOfCapture.pop();
+//	queue_TransformData.pop();
 
-	QueueMutex.unlock();//关闭忙标志，使能队列操作。
+//	QueueMutex.unlock();//关闭忙标志，使能队列操作。
 
-	Filters(tmp, tmp2);
+//	Filters(tmp, tmp2);
 
-	//ICP
-	if (PointsOfTable.size() != 0)
-		ICP_Single(tmp2, PointsOfTable, tmp3);
+//	//ICP
+//	if (PointsOfTable.size() != 0)
+//		ICP_Single(tmp2, PointsOfTable, tmp3);
 
-	*PointsOfTable += *tmp2;//累加点云
-}
+//	*PointsOfTable += *tmp2;//累加点云
+//}
 
-//主动触发
-std::string Clear_QueueAndPoints()
-{
-	if (!QueueMutex.try_lock())
-		return "Processing!";
-	//isBusy = true;
+////主动触发
+//std::string Clear_QueueAndPoints()
+//{
+//	if (!QueueMutex.try_lock())
+//		return "Processing!";
+//	//isBusy = true;
 
-	(*PointsOfTable).clear();
+//	(*PointsOfTable).clear();
 
-	while (!queue_PointsOfCapture.empty())
-		queue_PointsOfCapture.pop();	
-	while (!queue_TransformData.empty())
-		queue_TransformData.pop();
+//	while (!queue_PointsOfCapture.empty())
+//		queue_PointsOfCapture.pop();
+//	while (!queue_TransformData.empty())
+//		queue_TransformData.pop();
 
-	QueueMutex.unlock();
+//	QueueMutex.unlock();
 
-	return "Clear_Queue_Points() Success!";
-}
+//	return "Clear_Queue_Points() Success!";
+//}
 
-//主动触发
-std::string SwitchSysMode(std::string ModeStr)
-{
-	switch (SystemMode)
-	{
-		case Capture://当前模式
-			switch (ModeStr)//目标模式
-			{
-				case "CaptureMode":
-					return "Now CaptureMode. No need to switch!"
-					break;
-				case "ProcessMode":
-					if (!queue_PointsOfCapture.empty())
-						return "Now CaptureMode. Processing......!";
-					SystemMode = Process;
-					break;
-				default:
-					break;
-			}
-			break;
-		case Process:
-			switch (ModeStr)//目标模式
-			{
-				case "CaptureMode":
-					SystemMode = Capture;
-					Clear_QueueAndPoints();
-					return "Switch to Capture mode and clear Queue and GlobePointCloud successfully!";
-					break;
-				case "ProcessMode":
-					return "Now ProcessMode. No need to switch!"
-					break;
-				default:
-					break;
-			}
-			break;
-		default:
-			break;
-	}
+////主动触发
+//std::string SwitchSysMode(std::string ModeStr)
+//{
+//	switch (SystemMode)
+//	{
+//		case Capture://当前模式
+//			switch (ModeStr)//目标模式
+//			{
+//				case "CaptureMode":
+//					return "Now CaptureMode. No need to switch!"
+//					break;
+//				case "ProcessMode":
+//					if (!queue_PointsOfCapture.empty())
+//						return "Now CaptureMode. Processing......!";
+//					SystemMode = Process;
+//					break;
+//				default:
+//					break;
+//			}
+//			break;
+//		case Process:
+//			switch (ModeStr)//目标模式
+//			{
+//				case "CaptureMode":
+//					SystemMode = Capture;
+//					Clear_QueueAndPoints();
+//					return "Switch to Capture mode and clear Queue and GlobePointCloud successfully!";
+//					break;
+//				case "ProcessMode":
+//					return "Now ProcessMode. No need to switch!"
+//					break;
+//				default:
+//					break;
+//			}
+//			break;
+//		default:
+//			break;
+//	}
 	
-}
+//}
 
 
 
@@ -205,14 +205,12 @@ void CovertTo_OrgnizedPointCloud(PCXYZ_Ptr &Source, double Width, double Height)
 	(*Source).width = RealHeight * Scale;
 	if ((*Source).height * (*Source).width > (*Source).size())//如果新算的大小大于原始的，则将宽度减少1；
 		(*Source).width--;
-	(*Source).isOrgnized = true;
 }
 
 void CovertTo_UnOrgnizedPointCloud(PCXYZ_Ptr &Source)
 {
 	(*Source).height = 1;
 	(*Source).width = (*Source).size();
-	(*Source).isOrgnized = false;
 }
 
 void ExtractPlane(PCXYZ_Ptr Source, PCXYZ_Ptr Plane, PCXYZ_Ptr Rest)//抽出平面，Rest去除平面后的点云；返回值是抽出的平面。
@@ -288,7 +286,7 @@ Mat4f ICP_Single(PCXYZ_Ptr Source, PCXYZ_Ptr Target, PCXYZ_Ptr Output)
 
 	if (icp.hasConverged())
 	{
-		std::cout << std::endl << i << "ICP has converged, score is " << icp.getFitnessScore();
+		std::cout << "ICP has converged, score is " << icp.getFitnessScore();
 		pcl::transformPointCloud(*Source, *Output, icp.getFinalTransformation());
 		return icp.getFinalTransformation();
 	}

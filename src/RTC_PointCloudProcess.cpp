@@ -134,6 +134,7 @@ RTC::ReturnCode_t RTC_PointCloudProcess::onActivated(RTC::UniqueId ec_id) {
 
 RTC::ReturnCode_t RTC_PointCloudProcess::onExecute(RTC::UniqueId ec_id) {
 
+	std::cout << "exe!" << std::endl;
 	// check new command
 	if (m_command_inIn.isNew()) {
 		//read new command

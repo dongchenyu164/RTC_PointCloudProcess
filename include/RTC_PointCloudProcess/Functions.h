@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "define.h"
+#include "Define.h"
 
 void CovertTo_OrgnizedPointCloud(PCXYZ_Ptr &Source, double Width, double Height);
 void CovertTo_UnOrgnizedPointCloud(PCXYZ_Ptr &Source);

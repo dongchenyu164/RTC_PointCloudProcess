@@ -15,6 +15,23 @@
 #include <pcl/filters/passthrough.h>
 #include <pcProcessLib.h>
 
+
+//*******************************************************
+//**Edit by Dong.
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#include <thread>
+#include "Functions.h"
+char* ComPcProcessSVC_impl::PublicReturnStringPointer = new char[100];
+PCXYZ_Ptr ComPcProcessSVC_impl::PointsOfTable = PCXYZ_Ptr(new PCXYZ);
+ComPcProcessSVC_impl::PointCloudProcessMode ComPcProcessSVC_impl::SystemMode = ComPcProcessSVC_impl::Capture;
+std::queue<PCXYZ_Ptr> ComPcProcessSVC_impl::queue_PointsOfCapture;//被捕获的点云的存放队列。
+std::queue<Eigen::Matrix4f> ComPcProcessSVC_impl::queue_TransformData;//被捕获的点云的位姿矩阵。
+std::mutex ComPcProcessSVC_impl::QueueMutex;
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+//**Edit by Dong. (END)
+//*******************************************************
+
+
 /*
  * Example implementational code for IDL interface ComPcProcess
  */
@@ -109,39 +126,70 @@ RTC::PointCloud* ComPcProcessSVC_impl::get_pointCloud(::CORBA::Boolean& flag) {
 //***********************************
 //**Dong's Code
 //***********************************
+char* Make_RTC_ReturnString(std::string Data)
+{
+//	//delete ComPcProcessSVC_impl::PublicReturnStringPointer;
+//	char* tmp = new char[Data.size() + 1];
+//	//ComPcProcessSVC_impl::PublicReturnStringPointer = tmp;
+//	return tmp;
+	return CORBA::string_dup(Data.c_str());
+}
 
 char* ComPcProcessSVC_impl::Capture_PointClould(const ::ComPcProcess::Matrix4_4 TransformData)
 {
-	std::cout << "Capture!" << std::endl;
-	for(int i = 0;i < 4;i++)
-		for(int j = 0;j < 4;j++)
-			std::cout << TransformData[i][j] << std::endl;
-	return const_cast<char*>("Success!\n");
+	if (m_pointCloud_inIn->isNew())
+	{
+		if (!QueueMutex.try_lock())
+			std::cout << "Queue is processing!" << std::endl;
+		while (!QueueMutex.try_lock());
+
+		// ========== point cloud convert RTC -> PCL ==============
+		pcl::PointCloud<pcl::PointXYZ> cloud;
+		cvt_RTCpc_to_PCLpc(*m_pointCloud_in, cloud);
+		// ========== cut near 0 (under 0.001) ====================
+		pcl::PointCloud<pcl::PointXYZ> DataIn;
+		cut_pointCloud_z(cloud, DataIn, 0.001);
+
+		double tmpTransformData[4][4];
+		for(int i = 0;i < 4;i++)
+			for(int j = 0;j < 4;j++)
+				tmpTransformData[i][j] = TransformData[i][j];
+
+		ComPcProcessSVC_impl::queue_PointsOfCapture.push(DataIn.makeShared());
+		ComPcProcessSVC_impl::queue_TransformData.push(MakeTransformMatrix(tmpTransformData));
+
+		QueueMutex.unlock();
+
+		return Make_RTC_ReturnString("Capture_PointClould() Success!");
+	}
+	else
+		return Make_RTC_ReturnString("No new data!");
 }
 
 char* ComPcProcessSVC_impl::SwitchSysMode(const char* ModeStr)
 {
 	string str = ModeStr;
 	std::cout << str << std::endl;
-	return const_cast<char*>(str.c_str());
+
+	return Make_RTC_ReturnString(str);
 }
 
 char* ComPcProcessSVC_impl::Clear_QueueAndPoints()
 {
 	string str = "ModeStr";
 	std::cout << str << std::endl;
-	return const_cast<char*>(str.c_str());
+
+
+	return Make_RTC_ReturnString(str);
 }
 
 ComPcProcess::CupInfo_slice* ComPcProcessSVC_impl::GetCupInfo()
 {
-	ComPcProcess::CupInfo Res;
-
-	for(int i = 0;i < 7;i++)
-		ComPcProcessSVC_impl::Result_CupInfo[i] = i * 3;
+	ComPcProcess::CupInfo* tmp = new ComPcProcess::CupInfo[5];
 	for(int i = 0;i < 5;i++)
 		for(int j = 0;j < 7;j++)
-			Res[i][j] = (CORBA::Double)(i * 7 + j);
+			(*tmp)[i][j] = (CORBA::Double)(i * 3);
+			//Res[i][j] = (CORBA::Double)(i * 7 + j);
 
-	return Res;
+	return (*tmp);
 }

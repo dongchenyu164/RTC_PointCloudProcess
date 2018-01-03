@@ -37,14 +37,24 @@
 void cvt_RTCpc_to_PCLpc(
 		RTC::PointCloud& pc,
 		pcl::PointCloud<pcl::PointXYZRGB>& pclPc);
+void cvt_RTCpc_to_PCLpc(
+		RTC::PointCloud& pc,
+		pcl::PointCloud<pcl::PointXYZ>& pclPc);
 
 void cvt_PCLpc_to_RTCpc(
 		pcl::PointCloud<pcl::PointXYZRGB>& pclPc,
+		RTC::PointCloud& pc);
+void cvt_PCLpc_to_RTCpc(
+		pcl::PointCloud<pcl::PointXYZ>& pclPc,
 		RTC::PointCloud& pc);
 
 void cut_pointCloud_z(
 		pcl::PointCloud<pcl::PointXYZRGB>& cloud,
 		pcl::PointCloud<pcl::PointXYZRGB>& cloud_fi9lters,
+		int cut_value);
+void cut_pointCloud_z(
+		pcl::PointCloud<pcl::PointXYZ>& cloud,
+		pcl::PointCloud<pcl::PointXYZ>& cloud_fi9lters,
 		int cut_value);
 
 #endif /* INCLUDE_RTC_POINTCLOUDPROCESS_PCPROCESSLIB_H_ */
