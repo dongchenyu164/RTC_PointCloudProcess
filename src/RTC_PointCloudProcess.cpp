@@ -25,6 +25,17 @@
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/filters/passthrough.h>
 
+//*******************************************************
+//**Edit by Dong.
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#include "Functions.h"
+#include <thread>
+#include "pcProcessPortSVC_impl.h"
+
+void Transform_PointCloud();
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+//**Edit by Dong. (END)
+//*******************************************************
 
 // ======================================================================
 //
@@ -134,7 +145,6 @@ RTC::ReturnCode_t RTC_PointCloudProcess::onActivated(RTC::UniqueId ec_id) {
 
 RTC::ReturnCode_t RTC_PointCloudProcess::onExecute(RTC::UniqueId ec_id) {
 
-	std::cout << "exe!" << std::endl;
 	// check new command
 	if (m_command_inIn.isNew()) {
 		//read new command
@@ -148,14 +158,79 @@ RTC::ReturnCode_t RTC_PointCloudProcess::onExecute(RTC::UniqueId ec_id) {
 			std::cout << "length : " << m_pointCloud_in.points.length()
 					<< std::endl;
 
-			pcl::PointCloud<pcl::PointXYZRGB> cloud;
-			pcProcess(m_pointCloud_in, cloud);
+//			pcl::PointCloud<pcl::PointXYZRGB> cloud;
+//			pcProcess(m_pointCloud_in, cloud);
 
 		}
 	}
-
+	//*******************************************************
+	//**Edit by Dong.
+	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	if(ComPcProcessSVC_impl::SystemMode == ComPcProcessSVC_impl::Capture)
+	{
+		std::cout << "###### onExecute. Capture Mode!" << std::endl;
+		Transform_PointCloud();
+	}
+	else
+		std::cout << "###### onExecute. Process Mode!" << std::endl;
+	//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	//**Edit by Dong. (END)
+	//*******************************************************
+	
 	return RTC::RTC_OK;
 }
+
+//*******************************************************
+//**Edit by Dong.
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+void Transform_PointCloud()
+{
+	if (ComPcProcessSVC_impl::SystemMode != ComPcProcessSVC_impl::Capture)
+		return;
+
+	if (!ComPcProcessSVC_impl::QueueMutex.try_lock())
+	{
+		std::cout << "Transform_PointCloud() Queue is now using, exit!" << std::endl;
+		return;
+	}
+	if (ComPcProcessSVC_impl::queue_PointsOfCapture.empty() || ComPcProcessSVC_impl::queue_TransformData.empty())
+	{
+		std::cout << "Transform_PointCloud() Queue is empty, exit!" << std::endl;
+		ComPcProcessSVC_impl::QueueMutex.unlock();
+		return;
+	}
+
+	std::cout << "Transform_PointCloud() Start to process!" << std::endl;
+
+	PCXYZ_Ptr tmp(new PCXYZ);
+	PCXYZ_Ptr tmp2(new PCXYZ);
+	PCXYZ_Ptr tmp3(new PCXYZ);
+
+char a = 0;
+std::cin>>a;
+	pcl::transformPointCloud(*ComPcProcessSVC_impl::queue_PointsOfCapture.front(), *tmp, ComPcProcessSVC_impl::queue_TransformData.front());
+std::cout << "Transform_PointCloud() End of transformPointCloud()!" << std::endl;
+std::cin>>a;
+	//调用完后弹出队列
+	ComPcProcessSVC_impl::queue_PointsOfCapture.pop();
+	ComPcProcessSVC_impl::queue_TransformData.pop();
+
+	ComPcProcessSVC_impl::QueueMutex.unlock();//关闭忙标志，使能队列操作。
+std::cout << "Transform_PointCloud() End of Unlock Queue!" << std::endl;
+std::cin>>a;
+	Filters(tmp, tmp2);
+std::cout << "Transform_PointCloud() End of Filters()!" << std::endl;
+std::cin>>a;
+	//ICP
+	if ((*ComPcProcessSVC_impl::PointsOfTable).size() != 0)
+		ICP_Single(tmp2, ComPcProcessSVC_impl::PointsOfTable, tmp3);
+std::cout << "Transform_PointCloud() End of ICP()!" << std::endl;
+std::cin>>a;
+	*ComPcProcessSVC_impl::PointsOfTable += *tmp3;//累加点云
+}
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+//**Edit by Dong. (END)
+//*******************************************************
 
 /*
  RTC::ReturnCode_t RTC_PointCloudProcess::onAborting(RTC::UniqueId ec_id)

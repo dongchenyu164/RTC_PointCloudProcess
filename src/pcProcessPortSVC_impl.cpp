@@ -132,17 +132,25 @@ char* Make_RTC_ReturnString(std::string Data)
 //	char* tmp = new char[Data.size() + 1];
 //	//ComPcProcessSVC_impl::PublicReturnStringPointer = tmp;
 //	return tmp;
+	std::cout << Data << std::endl;
 	return CORBA::string_dup(Data.c_str());
 }
 
 char* ComPcProcessSVC_impl::Capture_PointClould(const ::ComPcProcess::Matrix4_4 TransformData)
 {
-	if (m_pointCloud_inIn->isNew())
-	{
-		if (!QueueMutex.try_lock())
-			std::cout << "Queue is processing!" << std::endl;
-		while (!QueueMutex.try_lock());
+	std::thread::id ThreadId = std::this_thread::get_id();
+	std::cout << "###### GetCupInfo() Thread ID:" << ThreadId << std::endl;
 
+	while (!m_pointCloud_inIn->isNew());
+	/*if (m_pointCloud_inIn->isNew())*/
+	{
+//		if (!QueueMutex.try_lock())
+//			std::cout << "Queue is processing!" << std::endl;
+		while (!QueueMutex.try_lock());
+		std::cout << "Start to capture!" << std::endl;
+
+		// read new point cloud
+		m_pointCloud_inIn->read();
 		// ========== point cloud convert RTC -> PCL ==============
 		pcl::PointCloud<pcl::PointXYZ> cloud;
 		cvt_RTCpc_to_PCLpc(*m_pointCloud_in, cloud);
@@ -162,34 +170,91 @@ char* ComPcProcessSVC_impl::Capture_PointClould(const ::ComPcProcess::Matrix4_4 
 
 		return Make_RTC_ReturnString("Capture_PointClould() Success!");
 	}
-	else
-		return Make_RTC_ReturnString("No new data!");
+//	else
+//		return Make_RTC_ReturnString("No new data!");
 }
 
 char* ComPcProcessSVC_impl::SwitchSysMode(const char* ModeStr)
 {
-	string str = ModeStr;
-	std::cout << str << std::endl;
+	std::thread::id ThreadId = std::this_thread::get_id();
+	std::cout << "###### GetCupInfo() Thread ID:" << ThreadId << std::endl;
 
-	return Make_RTC_ReturnString(str);
+	std::string tmpModeStr = std::string(ModeStr);
+	ComPcProcessSVC_impl::PointCloudProcessMode tmpMode = ComPcProcessSVC_impl::Capture;
+	if(tmpModeStr == "CaptureMode")
+		tmpMode = ComPcProcessSVC_impl::Capture;
+	else if(tmpModeStr == "ProcessMode")
+		tmpMode = ComPcProcessSVC_impl::Process;
+	else
+		tmpMode = ComPcProcessSVC_impl::Capture;
+
+	switch (ComPcProcessSVC_impl::SystemMode)
+	{
+		case ComPcProcessSVC_impl::Capture://当前模式
+			switch (tmpMode)//目标模式
+			{
+				case ComPcProcessSVC_impl::Capture:
+					return Make_RTC_ReturnString("Now CaptureMode. No need to switch!");
+					break;
+				case ComPcProcessSVC_impl::Process:
+					if (!ComPcProcessSVC_impl::queue_PointsOfCapture.empty())
+						return Make_RTC_ReturnString("Now CaptureMode. Processing......!");
+					ComPcProcessSVC_impl::SystemMode = ComPcProcessSVC_impl::Process;
+					break;
+				default:
+					break;
+			}
+			break;
+		case ComPcProcessSVC_impl::Process:
+			switch (tmpMode)//目标模式
+			{
+				case ComPcProcessSVC_impl::Capture:
+					ComPcProcessSVC_impl::SystemMode = ComPcProcessSVC_impl::Capture;
+					Clear_QueueAndPoints();
+					return Make_RTC_ReturnString("Switch to Capture mode and clear Queue and GlobePointCloud successfully!");
+					break;
+				case ComPcProcessSVC_impl::Process:
+					return Make_RTC_ReturnString("Now ProcessMode. No need to switch!");
+					break;
+				default:
+					break;
+			}
+			break;
+		default:
+			break;
+	}
+	return Make_RTC_ReturnString("No Mode mathed!");
 }
 
 char* ComPcProcessSVC_impl::Clear_QueueAndPoints()
 {
-	string str = "ModeStr";
-	std::cout << str << std::endl;
+	std::thread::id ThreadId = std::this_thread::get_id();
+	std::cout << "###### GetCupInfo() Thread ID:" << ThreadId << std::endl;
 
+	if (!ComPcProcessSVC_impl::QueueMutex.try_lock())
+		return Make_RTC_ReturnString("Fail Processing!");
 
-	return Make_RTC_ReturnString(str);
+	(*ComPcProcessSVC_impl::PointsOfTable).clear();
+
+	while (!ComPcProcessSVC_impl::queue_PointsOfCapture.empty())
+		ComPcProcessSVC_impl::queue_PointsOfCapture.pop();
+	while (!ComPcProcessSVC_impl::queue_TransformData.empty())
+		ComPcProcessSVC_impl::queue_TransformData.pop();
+
+	ComPcProcessSVC_impl::QueueMutex.unlock();
+
+	return Make_RTC_ReturnString("Clear_Queue_Points() Success!");
 }
 
 ComPcProcess::CupInfo_slice* ComPcProcessSVC_impl::GetCupInfo()
 {
+	std::thread::id ThreadId = std::this_thread::get_id();
+	std::cout << "###### GetCupInfo() Thread ID:" << ThreadId << std::endl;
+
 	ComPcProcess::CupInfo* tmp = new ComPcProcess::CupInfo[5];
 	for(int i = 0;i < 5;i++)
 		for(int j = 0;j < 7;j++)
 			(*tmp)[i][j] = (CORBA::Double)(i * 3);
-			//Res[i][j] = (CORBA::Double)(i * 7 + j);
 
 	return (*tmp);
 }
