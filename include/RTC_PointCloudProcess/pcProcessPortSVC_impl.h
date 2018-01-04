@@ -74,7 +74,7 @@ public:
 	static PointCloudProcessMode SystemMode;
 
 	static PCXYZ_Ptr PointsOfTable;//合成后的桌子的点云。
-	static std::queue<PCXYZ_Ptr> queue_PointsOfCapture;//被捕获的点云的存放队列。
+	static std::queue<PCXYZ> queue_PointsOfCapture;//被捕获的点云的存放队列。
 	static std::queue<Eigen::Matrix4f> queue_TransformData;//被捕获的点云的位姿矩阵。
 	static std::mutex QueueMutex;
 

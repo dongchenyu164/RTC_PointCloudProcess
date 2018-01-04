@@ -208,7 +208,7 @@ void Transform_PointCloud()
 
 char a = 0;
 std::cin>>a;
-	pcl::transformPointCloud(*ComPcProcessSVC_impl::queue_PointsOfCapture.front(), *tmp, ComPcProcessSVC_impl::queue_TransformData.front());
+	pcl::transformPointCloud(ComPcProcessSVC_impl::queue_PointsOfCapture.front(), *tmp, ComPcProcessSVC_impl::queue_TransformData.front());
 std::cout << "Transform_PointCloud() End of transformPointCloud()!" << std::endl;
 std::cin>>a;
 	//调用完后弹出队列

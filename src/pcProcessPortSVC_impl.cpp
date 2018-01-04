@@ -24,7 +24,7 @@
 char* ComPcProcessSVC_impl::PublicReturnStringPointer = new char[100];
 PCXYZ_Ptr ComPcProcessSVC_impl::PointsOfTable = PCXYZ_Ptr(new PCXYZ);
 ComPcProcessSVC_impl::PointCloudProcessMode ComPcProcessSVC_impl::SystemMode = ComPcProcessSVC_impl::Capture;
-std::queue<PCXYZ_Ptr> ComPcProcessSVC_impl::queue_PointsOfCapture;//被捕获的点云的存放队列。
+std::queue<PCXYZ> ComPcProcessSVC_impl::queue_PointsOfCapture;//被捕获的点云的存放队列。
 std::queue<Eigen::Matrix4f> ComPcProcessSVC_impl::queue_TransformData;//被捕获的点云的位姿矩阵。
 std::mutex ComPcProcessSVC_impl::QueueMutex;
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -163,7 +163,7 @@ char* ComPcProcessSVC_impl::Capture_PointClould(const ::ComPcProcess::Matrix4_4 
 			for(int j = 0;j < 4;j++)
 				tmpTransformData[i][j] = TransformData[i][j];
 
-		ComPcProcessSVC_impl::queue_PointsOfCapture.push(DataIn.makeShared());
+		ComPcProcessSVC_impl::queue_PointsOfCapture.push(DataIn);
 		ComPcProcessSVC_impl::queue_TransformData.push(MakeTransformMatrix(tmpTransformData));
 
 		QueueMutex.unlock();
