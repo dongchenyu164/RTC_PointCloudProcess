@@ -37,7 +37,7 @@
 void cvt_RTCpc_to_PCLpc(
 		RTC::PointCloud& pc,
 		pcl::PointCloud<pcl::PointXYZRGB>& pclPc);
-void cvt_RTCpc_to_PCLpc(
+int cvt_RTCpc_to_PCLpc(
 		RTC::PointCloud& pc,
 		pcl::PointCloud<pcl::PointXYZ>& pclPc);
 

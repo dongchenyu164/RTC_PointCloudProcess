@@ -143,21 +143,28 @@ char* ComPcProcessSVC_impl::Capture_PointClould(const ::ComPcProcess::Matrix4_4 
 
 	while (!m_pointCloud_inIn->isNew());
 	/*if (m_pointCloud_inIn->isNew())*/
-	{
-//		if (!QueueMutex.try_lock())
-//			std::cout << "Queue is processing!" << std::endl;
+
 		while (!QueueMutex.try_lock());
 		std::cout << "Start to capture!" << std::endl;
 
 		// read new point cloud
 		m_pointCloud_inIn->read();
-		// ========== point cloud convert RTC -> PCL ==============
-		pcl::PointCloud<pcl::PointXYZ> cloud;
-		cvt_RTCpc_to_PCLpc(*m_pointCloud_in, cloud);
-		// ========== cut near 0 (under 0.001) ====================
-		pcl::PointCloud<pcl::PointXYZ> DataIn;
-		cut_pointCloud_z(cloud, DataIn, 0.001);
 
+		// ========== point cloud convert RTC -> PCL ==============
+		pcl::PointCloud<pcl::PointXYZ> DataIn;
+		int Points = cvt_RTCpc_to_PCLpc(*m_pointCloud_in, DataIn);
+
+		if(Points <= 1000)
+		{
+			QueueMutex.unlock();
+			return Make_RTC_ReturnString("Capture_PointClould() Failed! Number of points is less than 1000!");
+		}
+
+		// ========== cut near 0 (under 0.001) ====================
+		pcl::PointCloud<pcl::PointXYZ> No;
+		cut_pointCloud_z(DataIn, No, 0.001);
+
+std::cout << "height:" << (DataIn).height << "...Size:" << (DataIn).size() << std::endl;
 		double tmpTransformData[4][4];
 		for(int i = 0;i < 4;i++)
 			for(int j = 0;j < 4;j++)
@@ -169,7 +176,7 @@ char* ComPcProcessSVC_impl::Capture_PointClould(const ::ComPcProcess::Matrix4_4 
 		QueueMutex.unlock();
 
 		return Make_RTC_ReturnString("Capture_PointClould() Success!");
-	}
+
 //	else
 //		return Make_RTC_ReturnString("No new data!");
 }

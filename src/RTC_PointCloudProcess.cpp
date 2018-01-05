@@ -30,6 +30,7 @@
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 #include "Functions.h"
 #include <thread>
+#include "Visualizer.h"
 #include "pcProcessPortSVC_impl.h"
 
 void Transform_PointCloud();
@@ -168,7 +169,7 @@ RTC::ReturnCode_t RTC_PointCloudProcess::onExecute(RTC::UniqueId ec_id) {
 	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	if(ComPcProcessSVC_impl::SystemMode == ComPcProcessSVC_impl::Capture)
 	{
-		std::cout << "###### onExecute. Capture Mode!" << std::endl;
+		//std::cout << "###### onExecute. Capture Mode!" << std::endl;
 		Transform_PointCloud();
 	}
 	else
@@ -205,28 +206,65 @@ void Transform_PointCloud()
 	PCXYZ_Ptr tmp(new PCXYZ);
 	PCXYZ_Ptr tmp2(new PCXYZ);
 	PCXYZ_Ptr tmp3(new PCXYZ);
+std::cout << "Transform_PointCloud() size of tranform:" << ComPcProcessSVC_impl::queue_PointsOfCapture.front().size() << std::endl;
+for(int i = 0;i < 4;i++)
+{
+	for(int j = 0;j < 4;j++)
+		std::cout << " " << (ComPcProcessSVC_impl::queue_TransformData.front())(i,j);
+	 std::cout <<std::endl;
+}
+char a=0;
+std::cin>>a;
+	PCXYZ Points(ComPcProcessSVC_impl::queue_PointsOfCapture.front());
+	Eigen::Matrix4f Mats(ComPcProcessSVC_impl::queue_TransformData.front());
+	pcl::transformPointCloud(Points, *tmp, Mats);
+	//(*tmp )= Points;
+	std::cout << "Transform_PointCloud() sfdsdsdsdsdsdsdsd" << std::endl;
+	std::cin>>a;
 
-char a = 0;
-std::cin>>a;
-	pcl::transformPointCloud(ComPcProcessSVC_impl::queue_PointsOfCapture.front(), *tmp, ComPcProcessSVC_impl::queue_TransformData.front());
-std::cout << "Transform_PointCloud() End of transformPointCloud()!" << std::endl;
-std::cin>>a;
+	std::cout << "Transform_PointCloud() Start to PopQueue!" << std::endl;
+
 	//调用完后弹出队列
 	ComPcProcessSVC_impl::queue_PointsOfCapture.pop();
 	ComPcProcessSVC_impl::queue_TransformData.pop();
 
 	ComPcProcessSVC_impl::QueueMutex.unlock();//关闭忙标志，使能队列操作。
-std::cout << "Transform_PointCloud() End of Unlock Queue!" << std::endl;
-std::cin>>a;
+	std::cout << "Transform_PointCloud() Start to Filter!" << std::endl;
+
 	Filters(tmp, tmp2);
-std::cout << "Transform_PointCloud() End of Filters()!" << std::endl;
-std::cin>>a;
+	std::cout << "Transform_PointCloud() Start to ICP!" << std::endl;
+
 	//ICP
 	if ((*ComPcProcessSVC_impl::PointsOfTable).size() != 0)
 		ICP_Single(tmp2, ComPcProcessSVC_impl::PointsOfTable, tmp3);
-std::cout << "Transform_PointCloud() End of ICP()!" << std::endl;
-std::cin>>a;
-	*ComPcProcessSVC_impl::PointsOfTable += *tmp3;//累加点云
+	else
+		tmp3 = tmp2;
+	std::cout << "Transform_PointCloud() End of ICP!" << std::endl;
+
+	(*ComPcProcessSVC_impl::PointsOfTable) += (*tmp3);//累加点云
+
+	//PointCloud_Visualizator_Stuck(ComPcProcessSVC_impl::PointsOfTable);
+
+		pcl::visualization::PCLVisualizer viewertest("3D Viewer Test");
+
+		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> ColorHandler(ComPcProcessSVC_impl::PointsOfTable, 255, 0, 0);//orange
+		viewertest.addPointCloud(ComPcProcessSVC_impl::PointsOfTable, ColorHandler, "Cloud");
+
+		viewertest.setBackgroundColor(0.1, 0.1, 0.1, 0);
+
+		while (!viewertest.wasStopped())
+		{
+			if (mtx.try_lock())
+			{
+				viewertest.spinOnce(5);
+				mtx.unlock();
+			}
+		}
+		//viewertest.close();
+		viewertest.close();
+	std::cout << "window close." << std::endl;
+		//viewertest.~PCLVisualizer();
+
 }
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 //**Edit by Dong. (END)

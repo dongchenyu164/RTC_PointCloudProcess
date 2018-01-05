@@ -166,29 +166,29 @@ PCXYZ_Ptr Filters(PCXYZ_Ptr Source, PCXYZ_Ptr Output)
 	PCXYZ_Ptr tmp4(new PCXYZ);
 	/*===============Z轴限定范围================*/
 
+	/*======双边滤波器FastBilateralFilter======*/
+std::cout << "Filter!" << (*Source).height << std::endl;
+	CovertTo_OrgnizedPointCloud(Source, 640, 480);
+std::cout << "Filter!" << (*Source).height << "...Size:" << (*Source).size() << std::endl;
+	fbf.setInputCloud(Source);
+	fbf.filter(*tmp);
+	CovertTo_UnOrgnizedPointCloud(tmp);
+	/*======双边滤波器FastBilateralFilter======*/
+
 	/*============<<<体素网格滤波================*/
-	VoxelGrid_sor.setInputCloud(Source);
-	VoxelGrid_sor.filter(*tmp);//过滤点云
+	VoxelGrid_sor.setInputCloud(tmp);
+	VoxelGrid_sor.filter(*tmp2);//过滤点云
 	/*===============体素网格滤波>>>=============*/
 
-
 	/*============<<<带通滤波器================*/ //Source->tmp
-	PassFilter.setInputCloud(tmp);
-	PassFilter.filter(*tmp2);
+	PassFilter.setInputCloud(tmp2);
+	PassFilter.filter(*tmp3);
 	/*======END======带通滤波器>>>====END======*/
 
-#pragma region /*======双边滤波器FastBilateralFilter======*/不用tmp -> tmp2
-	
-	CovertTo_OrgnizedPointCloud(tmp2, 640, 480);
-	fbf.setInputCloud(tmp2);
-	fbf.filter(*tmp3);
-#pragma endregion
-
-#pragma region /*===============去除极值================*/不用tmp2->tmp4
-	CovertTo_UnOrgnizedPointCloud(tmp3);
+	/*===============去除极值================*/
 	sor.setInputCloud(tmp3);
 	sor.filter(*Output);
-#pragma endregion
+	/*===============去除极值================*/
 
 	return Output;
 }

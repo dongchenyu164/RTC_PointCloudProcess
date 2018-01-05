@@ -37,10 +37,11 @@ void cvt_RTCpc_to_PCLpc(
 }
 /////////////////////////////////////////
 //For  pcl::PointCloud<pcl::PointXYZ>
-void cvt_RTCpc_to_PCLpc(
+int cvt_RTCpc_to_PCLpc(
 		RTC::PointCloud& pc,
 		pcl::PointCloud<pcl::PointXYZ>& pclPc) {
 
+	int NumValidPoints = 0;
 	pclPc.points.clear();
 	const int size_mat = pc.points.length();
 	for (int i = 0; i < size_mat; i++) {
@@ -48,8 +49,21 @@ void cvt_RTCpc_to_PCLpc(
 		p.x = pc.points[i].point.x;
 		p.y = pc.points[i].point.y;
 		p.z = pc.points[i].point.z;
-		pclPc.push_back(p);
+
+		if((p.x>0.001 || p.x <-0.001) &&
+			(p.y>0.001 || p.y <-0.001) &&
+			(p.z>0.001 || p.z <-0.001) )
+		{
+			NumValidPoints++;
+			pclPc.push_back(p);
+
+		}
+		else
+		{
+		}
+
 	}
+	return NumValidPoints;
 }
 
 void cvt_PCLpc_to_RTCpc(

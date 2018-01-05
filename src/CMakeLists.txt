@@ -1,5 +1,5 @@
 # ------------ Dong Change code ------------------------------------
-set(comp_srcs RTC_PointCloudProcess.cpp pcProcessPortSVC_impl.cpp Functions.cpp)
+set(comp_srcs RTC_PointCloudProcess.cpp pcProcessPortSVC_impl.cpp Functions.cpp Visualizer.cpp)
 
 # ------------ Origin version
 #set(comp_srcs RTC_PointCloudProcess.cpp pcProcessPortSVC_impl.cpp)

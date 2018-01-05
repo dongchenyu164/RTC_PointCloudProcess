@@ -13,7 +13,7 @@
 
 namespace std
 {
-#define  MAX_THREAD_NUM 256
+#define  MAX_THREAD_NUM 20
 
 	//线程池,可以提交变参函数或拉姆达表达式的匿名函数执行,可以获取执行返回值
 	//不支持类成员函数, 支持类静态成员函数或全局函数,Opteron()函数等
