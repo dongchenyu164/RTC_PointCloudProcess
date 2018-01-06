@@ -31,6 +31,7 @@
 #include "Functions.h"
 #include <thread>
 #include "Visualizer.h"
+#include "pcProcessLib.h"
 #include "pcProcessPortSVC_impl.h"
 
 void Transform_PointCloud();
@@ -206,6 +207,7 @@ void Transform_PointCloud()
 	PCXYZ_Ptr tmp(new PCXYZ);
 	PCXYZ_Ptr tmp2(new PCXYZ);
 	PCXYZ_Ptr tmp3(new PCXYZ);
+	PCXYZ_Ptr tmp4(new PCXYZ);
 std::cout << "Transform_PointCloud() size of tranform:" << ComPcProcessSVC_impl::queue_PointsOfCapture.front().size() << std::endl;
 for(int i = 0;i < 4;i++)
 {
@@ -214,14 +216,16 @@ for(int i = 0;i < 4;i++)
 	 std::cout <<std::endl;
 }
 char a=0;
-std::cin>>a;
+//std::cin>>a;
 	PCXYZ Points(ComPcProcessSVC_impl::queue_PointsOfCapture.front());
+	//pcl::copyPointCloud(ComPcProcessSVC_impl::queue_PointsOfCapture.front(), Points);
 	Eigen::Matrix4f Mats(ComPcProcessSVC_impl::queue_TransformData.front());
+//std::cin>>a;
+	//(*tmp) = Points;
 	pcl::transformPointCloud(Points, *tmp, Mats);
-	//(*tmp )= Points;
-	std::cout << "Transform_PointCloud() sfdsdsdsdsdsdsdsd" << std::endl;
-	std::cin>>a;
-
+//std::cin>>a;
+//	Filters(tmp2, tmp);
+std::cin>>a;
 	std::cout << "Transform_PointCloud() Start to PopQueue!" << std::endl;
 
 	//调用完后弹出队列
@@ -243,27 +247,7 @@ std::cin>>a;
 
 	(*ComPcProcessSVC_impl::PointsOfTable) += (*tmp3);//累加点云
 
-	//PointCloud_Visualizator_Stuck(ComPcProcessSVC_impl::PointsOfTable);
-
-		pcl::visualization::PCLVisualizer viewertest("3D Viewer Test");
-
-		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> ColorHandler(ComPcProcessSVC_impl::PointsOfTable, 255, 0, 0);//orange
-		viewertest.addPointCloud(ComPcProcessSVC_impl::PointsOfTable, ColorHandler, "Cloud");
-
-		viewertest.setBackgroundColor(0.1, 0.1, 0.1, 0);
-
-		while (!viewertest.wasStopped())
-		{
-			if (mtx.try_lock())
-			{
-				viewertest.spinOnce(5);
-				mtx.unlock();
-			}
-		}
-		//viewertest.close();
-		viewertest.close();
-	std::cout << "window close." << std::endl;
-		//viewertest.~PCLVisualizer();
+	PointCloud_Visualizator_Stuck(ComPcProcessSVC_impl::PointsOfTable);
 
 }
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -278,6 +262,9 @@ std::cin>>a;
  */
 
 RTC::ReturnCode_t RTC_PointCloudProcess::onError(RTC::UniqueId ec_id) {
+std::cout << "####ERROR#### Get in onError!" << std::endl;
+char a=0;
+std::cin>>a;
 	return RTC::RTC_OK;
 }
 
