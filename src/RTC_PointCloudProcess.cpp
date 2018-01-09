@@ -206,6 +206,7 @@ void Transform_PointCloud()
 	PCXYZ_Ptr tmp(new PCXYZ);
 	PCXYZ_Ptr tmp2(new PCXYZ);
 	PCXYZ_Ptr tmp3(new PCXYZ);
+
 std::cout << "Transform_PointCloud() size of tranform:" << ComPcProcessSVC_impl::queue_PointsOfCapture.front().size() << std::endl;
 for(int i = 0;i < 4;i++)
 {
@@ -215,12 +216,12 @@ for(int i = 0;i < 4;i++)
 }
 char a=0;
 std::cin>>a;
+
 	PCXYZ Points(ComPcProcessSVC_impl::queue_PointsOfCapture.front());
 	Eigen::Matrix4f Mats(ComPcProcessSVC_impl::queue_TransformData.front());
+	
 	pcl::transformPointCloud(Points, *tmp, Mats);
-	//(*tmp )= Points;
-	std::cout << "Transform_PointCloud() sfdsdsdsdsdsdsdsd" << std::endl;
-	std::cin>>a;
+std::cin>>a;
 
 	std::cout << "Transform_PointCloud() Start to PopQueue!" << std::endl;
 
@@ -244,26 +245,6 @@ std::cin>>a;
 	(*ComPcProcessSVC_impl::PointsOfTable) += (*tmp3);//累加点云
 
 	//PointCloud_Visualizator_Stuck(ComPcProcessSVC_impl::PointsOfTable);
-
-		pcl::visualization::PCLVisualizer viewertest("3D Viewer Test");
-
-		pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> ColorHandler(ComPcProcessSVC_impl::PointsOfTable, 255, 0, 0);//orange
-		viewertest.addPointCloud(ComPcProcessSVC_impl::PointsOfTable, ColorHandler, "Cloud");
-
-		viewertest.setBackgroundColor(0.1, 0.1, 0.1, 0);
-
-		while (!viewertest.wasStopped())
-		{
-			if (mtx.try_lock())
-			{
-				viewertest.spinOnce(5);
-				mtx.unlock();
-			}
-		}
-		//viewertest.close();
-		viewertest.close();
-	std::cout << "window close." << std::endl;
-		//viewertest.~PCLVisualizer();
 
 }
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
