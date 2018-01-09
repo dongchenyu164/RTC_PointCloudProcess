@@ -216,15 +216,15 @@ for(int i = 0;i < 4;i++)
 	 std::cout <<std::endl;
 }
 char a=0;
-//std::cin>>a;
+std::cin>>a;
 	PCXYZ Points(ComPcProcessSVC_impl::queue_PointsOfCapture.front());
 	//pcl::copyPointCloud(ComPcProcessSVC_impl::queue_PointsOfCapture.front(), Points);
 	Eigen::Matrix4f Mats(ComPcProcessSVC_impl::queue_TransformData.front());
-//std::cin>>a;
+std::cin>>a;
+	Filters(Points.makeShared(), tmp);
+std::cin>>a;
 	//(*tmp) = Points;
-	pcl::transformPointCloud(Points, *tmp, Mats);
-//std::cin>>a;
-//	Filters(tmp2, tmp);
+	pcl::transformPointCloud(*tmp, *tmp2, Mats);
 std::cin>>a;
 	std::cout << "Transform_PointCloud() Start to PopQueue!" << std::endl;
 
@@ -235,7 +235,7 @@ std::cin>>a;
 	ComPcProcessSVC_impl::QueueMutex.unlock();//关闭忙标志，使能队列操作。
 	std::cout << "Transform_PointCloud() Start to Filter!" << std::endl;
 
-	Filters(tmp, tmp2);
+	//Filters(tmp, tmp2);
 	std::cout << "Transform_PointCloud() Start to ICP!" << std::endl;
 
 	//ICP
@@ -246,9 +246,6 @@ std::cin>>a;
 	std::cout << "Transform_PointCloud() End of ICP!" << std::endl;
 
 	(*ComPcProcessSVC_impl::PointsOfTable) += (*tmp3);//累加点云
-
-	PointCloud_Visualizator_Stuck(ComPcProcessSVC_impl::PointsOfTable);
-
 }
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 //**Edit by Dong. (END)
