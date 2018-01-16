@@ -72,11 +72,10 @@ void VisualizationProcess_PCXYZ(pcl::PointCloud<pcl::PointXYZ>::Ptr Data)
 			mtx.unlock();
 		}
 	}
-	//viewertest.close();
 	viewertest.close();
-std::cout << "window close." << std::endl;
-	//viewertest.~PCLVisualizer();
+std::cout << "PointCloud_Visualizator_Stuck() Window close." << std::endl;
 }
+
 void VisualizationProcess_PCXYZ_Array(pcl::PointCloud<pcl::PointXYZ>::Ptr Data[], int NumOfData)
 {
 	pcl::visualization::PCLVisualizer viewertest("3D Viewer Test");

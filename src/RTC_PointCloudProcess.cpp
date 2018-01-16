@@ -208,17 +208,20 @@ void Transform_PointCloud()
 	PCXYZ_Ptr tmp3(new PCXYZ);
 
 std::cout << "Transform_PointCloud() size of tranform:" << ComPcProcessSVC_impl::queue_PointsOfCapture.front().size() << std::endl;
+std::cout << "Transform_PointCloud() Transform matrix is :" << std::endl;
 for(int i = 0;i < 4;i++)
 {
-	for(int j = 0;j < 4;j++)
-		std::cout << " " << (ComPcProcessSVC_impl::queue_TransformData.front())(i,j);
-	 std::cout <<std::endl;
+for(int j = 0;j < 4;j++)
+std::cout << " " << (ComPcProcessSVC_impl::queue_TransformData.front())(i,j);
+std::cout <<std::endl;
 }
-char a=0;
-std::cin>>a;
 
 	PCXYZ Points(ComPcProcessSVC_impl::queue_PointsOfCapture.front());
 	Eigen::Matrix4f Mats(ComPcProcessSVC_impl::queue_TransformData.front());
+std::cout << "Transform_PointCloud() Reading from Queue is success!" << std::endl;
+std::cout << "Transform_PointCloud() Press key to start transformPointCloud!" << std::endl;
+char a=0;
+std::cin>>a;
 	
 	pcl::transformPointCloud(Points, *tmp, Mats);
 std::cin>>a;
