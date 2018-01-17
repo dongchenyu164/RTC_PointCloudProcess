@@ -69,7 +69,6 @@ public:
 	ComPcProcess::CupInfo_slice* GetCupInfo();
 
 	enum PointCloudProcessMode{Capture, Process};
-	//先是数据读入状态，接收【当前机械臂位姿】信号
 	static PointCloudProcessMode SystemMode;
 
 	static PCXYZ_Ptr PointsOfTable;//合成后的桌子的点云。

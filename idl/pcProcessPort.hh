@@ -119,6 +119,10 @@ public:
   static _core_attr const char* _PD_repoId;
 
   // Other IDL defined within this scope.
+  static _core_attr const ::CORBA::Short LENGTH_OF_CUPINFO _init_in_cldecl_( = 10 );
+
+  static _core_attr const ::CORBA::Short DATA_LENGTH_OF_CUPINFO _init_in_cldecl_( = 7 );
+
   static _dyn_attr const ::CORBA::TypeCode_ptr _tc_Matrix4_4;
 
   typedef ::CORBA::Double Matrix4_4[4][4];
@@ -173,18 +177,18 @@ public:
 
   static _dyn_attr const ::CORBA::TypeCode_ptr _tc_CupInfo;
 
-  typedef ::CORBA::Double CupInfo[5][7];
+  typedef ::CORBA::Double CupInfo[10][7];
   typedef ::CORBA::Double CupInfo_slice[7];
 
   static inline CupInfo_slice* CupInfo_alloc() {
-    return new CupInfo_slice[5];
+    return new CupInfo_slice[10];
   }
 
   static inline CupInfo_slice* CupInfo_dup(const CupInfo_slice* _s) {
     if (!_s) return 0;
     CupInfo_slice* _data = CupInfo_alloc();
     if (_data) {
-      for (_CORBA_ULong _0i0 = 0; _0i0 < 5; _0i0++){
+      for (_CORBA_ULong _0i0 = 0; _0i0 < 10; _0i0++){
         for (_CORBA_ULong _0i1 = 0; _0i1 < 7; _0i1++){
           
           _data[_0i0][_0i1] = _s[_0i0][_0i1];
@@ -197,7 +201,7 @@ public:
   }
 
   static inline void CupInfo_copy(CupInfo_slice* _to, const CupInfo_slice* _from){
-    for (_CORBA_ULong _0i0 = 0; _0i0 < 5; _0i0++){
+    for (_CORBA_ULong _0i0 = 0; _0i0 < 10; _0i0++){
       for (_CORBA_ULong _0i1 = 0; _0i1 < 7; _0i1++){
         
         _to[_0i0][_0i1] = _from[_0i0][_0i1];

@@ -14,6 +14,10 @@ static const char* _0RL_library_version = omniORB_4_1;
 
 
 
+const ::CORBA::Short ComPcProcess::LENGTH_OF_CUPINFO _init_in_cldef_( = 10 );
+
+const ::CORBA::Short ComPcProcess::DATA_LENGTH_OF_CUPINFO _init_in_cldef_( = 7 );
+
 ComPcProcess_ptr ComPcProcess_Helper::_nil() {
   return ::ComPcProcess::_nil();
 }
@@ -258,7 +262,7 @@ _0RL_lcfn_a93046d6d953ea9d_30000000(omniCallDescriptor* cd, omniServant* svnt)
 
 }
 // Proxy call descriptor class. Mangled signature:
-//  _a5_a7_cdouble
+//  _a10_a7_cdouble
 class _0RL_cd_a93046d6d953ea9d_40000000
   : public omniCallDescriptor
 {
@@ -284,13 +288,13 @@ void _0RL_cd_a93046d6d953ea9d_40000000::marshalReturnedValues(cdrStream& _n)
   
 #ifndef OMNI_MIXED_ENDIAN_DOUBLE
   if (! _n.marshal_byte_swap()) {
-    _n.put_octet_array((_CORBA_Octet*)((ComPcProcess::CupInfo_slice*)result),280,omni::ALIGN_8);
+    _n.put_octet_array((_CORBA_Octet*)((ComPcProcess::CupInfo_slice*)result),560,omni::ALIGN_8);
   }
   else 
 #endif
   {
-    _n.declareArrayLength(omni::ALIGN_8, 280);
-    for (_CORBA_ULong _0i0 = 0; _0i0 < 5; _0i0++){
+    _n.declareArrayLength(omni::ALIGN_8, 560);
+    for (_CORBA_ULong _0i0 = 0; _0i0 < 10; _0i0++){
       for (_CORBA_ULong _0i1 = 0; _0i1 < 7; _0i1++){
         result[_0i0][_0i1] >>= _n;
       }
@@ -302,7 +306,7 @@ void _0RL_cd_a93046d6d953ea9d_40000000::marshalReturnedValues(cdrStream& _n)
 void _0RL_cd_a93046d6d953ea9d_40000000::unmarshalReturnedValues(cdrStream& _n)
 {
   result = ComPcProcess::CupInfo_alloc();
-  _n.unmarshalArrayDouble((_CORBA_Double*)((ComPcProcess::CupInfo_slice*)result), 35);
+  _n.unmarshalArrayDouble((_CORBA_Double*)((ComPcProcess::CupInfo_slice*)result), 70);
 
 }
 

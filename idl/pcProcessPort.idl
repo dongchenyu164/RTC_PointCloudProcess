@@ -6,8 +6,11 @@ interface ComPcProcess
 	RTC::PointCloud get_pointCloud(out boolean flag);
 	boolean save_pointCloud(in string str);
 	
+	const short LENGTH_OF_CUPINFO = 10;
+	const short DATA_LENGTH_OF_CUPINFO = 3+3+1;//长 宽 高 x y z 角度
+	
 	typedef double Matrix4_4[4][4];
-	typedef double CupInfo[5][3+3+1];
+	typedef double CupInfo[LENGTH_OF_CUPINFO][DATA_LENGTH_OF_CUPINFO];
 	CupInfo GetCupInfo();
 	string Capture_PointClould(in Matrix4_4 TransformData);
 	string Clear_QueueAndPoints();
