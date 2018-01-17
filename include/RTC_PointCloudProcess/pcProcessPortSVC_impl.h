@@ -68,21 +68,17 @@ public:
 	char* Clear_QueueAndPoints();
 	ComPcProcess::CupInfo_slice* GetCupInfo();
 
-	static char* PublicReturnStringPointer;
 	enum PointCloudProcessMode{Capture, Process};
 	//先是数据读入状态，接收【当前机械臂位姿】信号
 	static PointCloudProcessMode SystemMode;
 
 	static PCXYZ_Ptr PointsOfTable;//合成后的桌子的点云。
+	static ComPcProcess::CupInfo* Result_CupInfo;// Informations of thing on the table.
 	static std::queue<PCXYZ> queue_PointsOfCapture;//被捕获的点云的存放队列。
 	static std::queue<Eigen::Matrix4f> queue_TransformData;//被捕获的点云的位姿矩阵。
 	static std::mutex QueueMutex;
 
 private:
-	ComPcProcess::CupInfo* Result_CupInfo;
-
-
-	void Transform_PointCloud();//应该在OnExecute函数内，在 拍摄 模式时，每周期调用。
 
 public:
 

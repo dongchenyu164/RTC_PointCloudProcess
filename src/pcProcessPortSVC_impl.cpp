@@ -19,14 +19,21 @@
 //*******************************************************
 //**Edit by Dong.
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
 #include <thread>
 #include "Functions.h"
-char* ComPcProcessSVC_impl::PublicReturnStringPointer = new char[100];
+
+//////// Globle variables
 PCXYZ_Ptr ComPcProcessSVC_impl::PointsOfTable = PCXYZ_Ptr(new PCXYZ);
+ComPcProcess::CupInfo* ComPcProcessSVC_impl::Result_CupInfo = new ComPcProcess::CupInfo[5];
+
 ComPcProcessSVC_impl::PointCloudProcessMode ComPcProcessSVC_impl::SystemMode = ComPcProcessSVC_impl::Capture;
+
+//////// Queue's variables
 std::queue<PCXYZ> ComPcProcessSVC_impl::queue_PointsOfCapture;//被捕获的点云的存放队列。
 std::queue<Eigen::Matrix4f> ComPcProcessSVC_impl::queue_TransformData;//被捕获的点云的位姿矩阵。
 std::mutex ComPcProcessSVC_impl::QueueMutex;
+
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 //**Edit by Dong. (END)
 //*******************************************************
@@ -126,68 +133,55 @@ RTC::PointCloud* ComPcProcessSVC_impl::get_pointCloud(::CORBA::Boolean& flag) {
 //***********************************
 //**Dong's Code
 //***********************************
-char* Make_RTC_ReturnString(std::string Data)
+char* Make_RTC_ReturnString(std::string Data, bool stdOut = false)
 {
-//	//delete ComPcProcessSVC_impl::PublicReturnStringPointer;
-//	char* tmp = new char[Data.size() + 1];
-//	//ComPcProcessSVC_impl::PublicReturnStringPointer = tmp;
-//	return tmp;
-	std::cout << Data << std::endl;
+	if(stdOut)
+		std::cout << Data << std::endl;
 	return CORBA::string_dup(Data.c_str());
 }
 
 char* ComPcProcessSVC_impl::Capture_PointClould(const ::ComPcProcess::Matrix4_4 TransformData)
 {
-	std::thread::id ThreadId = std::this_thread::get_id();
-	std::cout << "###### GetCupInfo() Thread ID:" << ThreadId << std::endl;
-
 	while (!m_pointCloud_inIn->isNew());
-	/*if (m_pointCloud_inIn->isNew())*/
+	while (!QueueMutex.try_lock());
 
-		while (!QueueMutex.try_lock());
-		std::cout << "Start to capture!" << std::endl;
+	std::cout << "Capture_PointClould() Start to capture!" << std::endl;
 
-		// read new point cloud
-		m_pointCloud_inIn->read();
+	/////// read new point cloud
+	m_pointCloud_inIn->read();
 
-		// ========== point cloud convert RTC -> PCL ==============
-		pcl::PointCloud<pcl::PointXYZ> DataIn;
-		int Points = cvt_RTCpc_to_PCLpc(*m_pointCloud_in, DataIn);
-
-		if(Points <= 1000)
-		{
-			QueueMutex.unlock();
-			return Make_RTC_ReturnString("Capture_PointClould() Failed! Number of points is less than 1000!");
-		}
-
-		// ========== cut near 0 (under 0.001) ====================
-		pcl::PointCloud<pcl::PointXYZ> No;
-		cut_pointCloud_z(DataIn, No, 0.001);
-
-std::cout << "height:" << (DataIn).height << "...Size:" << (DataIn).size() << std::endl;
-		double tmpTransformData[4][4];
-		for(int i = 0;i < 4;i++)
-			for(int j = 0;j < 4;j++)
-				tmpTransformData[i][j] = TransformData[i][j];
-
-		ComPcProcessSVC_impl::queue_PointsOfCapture.push(DataIn);
-		ComPcProcessSVC_impl::queue_TransformData.push(MakeTransformMatrix(tmpTransformData));
-
+	/////// point cloud convert RTC -> PCL
+	pcl::PointCloud<pcl::PointXYZ> DataIn;
+	int Points = cvt_RTCpc_to_PCLpc(*m_pointCloud_in, DataIn);
+	if(Points <= 1000)
+	{
 		QueueMutex.unlock();
+		return Make_RTC_ReturnString("Capture_PointClould() Failed! Number of points is less than 1000!", true);
+	}
 
-		return Make_RTC_ReturnString("Capture_PointClould() Success!");
+	/////// cut near 0 (under 0.001)
+	pcl::PointCloud<pcl::PointXYZ> No;
+	cut_pointCloud_z(DataIn, No, 0.001);
 
-//	else
-//		return Make_RTC_ReturnString("No new data!");
+	//////// Convet Matrix4_4 to double[][]
+	double tmpTransformData[4][4];
+	for(int i = 0;i < 4;i++)
+		for(int j = 0;j < 4;j++)
+			tmpTransformData[i][j] = TransformData[i][j];
+
+	ComPcProcessSVC_impl::queue_PointsOfCapture.push(DataIn);
+	ComPcProcessSVC_impl::queue_TransformData.push(MakeTransformMatrix(tmpTransformData));
+	QueueMutex.unlock();
+
+	return Make_RTC_ReturnString("Capture_PointClould() Success!", true);
 }
 
 char* ComPcProcessSVC_impl::SwitchSysMode(const char* ModeStr)
 {
-	std::thread::id ThreadId = std::this_thread::get_id();
-	std::cout << "###### GetCupInfo() Thread ID:" << ThreadId << std::endl;
-
 	std::string tmpModeStr = std::string(ModeStr);
 	ComPcProcessSVC_impl::PointCloudProcessMode tmpMode = ComPcProcessSVC_impl::Capture;
+
+	//////// Translate the string to PointCloudProcessMode.
 	if(tmpModeStr == "CaptureMode")
 		tmpMode = ComPcProcessSVC_impl::Capture;
 	else if(tmpModeStr == "ProcessMode")
@@ -195,17 +189,18 @@ char* ComPcProcessSVC_impl::SwitchSysMode(const char* ModeStr)
 	else
 		tmpMode = ComPcProcessSVC_impl::Capture;
 
+	//////// switch to target mode
 	switch (ComPcProcessSVC_impl::SystemMode)
 	{
-		case ComPcProcessSVC_impl::Capture://当前模式
-			switch (tmpMode)//目标模式
+		case ComPcProcessSVC_impl::Capture:// Current mode
+			switch (tmpMode)// Target mode
 			{
-				case ComPcProcessSVC_impl::Capture:
-					return Make_RTC_ReturnString("Now CaptureMode. No need to switch!");
+				case ComPcProcessSVC_impl::Capture:// Target mode
+					return Make_RTC_ReturnString("SwitchSysMode() Now CaptureMode. No need to switch!", true);
 					break;
-				case ComPcProcessSVC_impl::Process:
+				case ComPcProcessSVC_impl::Process:// Target mode
 					if (!ComPcProcessSVC_impl::queue_PointsOfCapture.empty())
-						return Make_RTC_ReturnString("Now CaptureMode. Processing......!");
+						return Make_RTC_ReturnString("SwitchSysMode() Switch to Process mode!", true);
 					ComPcProcessSVC_impl::SystemMode = ComPcProcessSVC_impl::Process;
 					break;
 				default:
@@ -213,15 +208,15 @@ char* ComPcProcessSVC_impl::SwitchSysMode(const char* ModeStr)
 			}
 			break;
 		case ComPcProcessSVC_impl::Process:
-			switch (tmpMode)//目标模式
+			switch (tmpMode)// Current mode
 			{
-				case ComPcProcessSVC_impl::Capture:
+				case ComPcProcessSVC_impl::Capture:// Target mode
 					ComPcProcessSVC_impl::SystemMode = ComPcProcessSVC_impl::Capture;
 					Clear_QueueAndPoints();
-					return Make_RTC_ReturnString("Switch to Capture mode and clear Queue and GlobePointCloud successfully!");
+					return Make_RTC_ReturnString("SwitchSysMode() Switch to Capture mode and clear Queue and GlobePointCloud successfully!", true);
 					break;
-				case ComPcProcessSVC_impl::Process:
-					return Make_RTC_ReturnString("Now ProcessMode. No need to switch!");
+				case ComPcProcessSVC_impl::Process:// Target mode
+					return Make_RTC_ReturnString("SwitchSysMode() Now ProcessMode. No need to switch!", true);
 					break;
 				default:
 					break;
@@ -230,16 +225,14 @@ char* ComPcProcessSVC_impl::SwitchSysMode(const char* ModeStr)
 		default:
 			break;
 	}
-	return Make_RTC_ReturnString("No Mode mathed!");
+
+	return Make_RTC_ReturnString("No Mode mathed!", true);
 }
 
 char* ComPcProcessSVC_impl::Clear_QueueAndPoints()
 {
-	std::thread::id ThreadId = std::this_thread::get_id();
-	std::cout << "###### GetCupInfo() Thread ID:" << ThreadId << std::endl;
-
 	if (!ComPcProcessSVC_impl::QueueMutex.try_lock())
-		return Make_RTC_ReturnString("Fail Processing!");
+		return Make_RTC_ReturnString("Fail Processing!", true);
 
 	(*ComPcProcessSVC_impl::PointsOfTable).clear();
 
@@ -250,18 +243,15 @@ char* ComPcProcessSVC_impl::Clear_QueueAndPoints()
 
 	ComPcProcessSVC_impl::QueueMutex.unlock();
 
-	return Make_RTC_ReturnString("Clear_Queue_Points() Success!");
+	return Make_RTC_ReturnString("Clear_Queue_Points() Success!", true);
 }
 
 ComPcProcess::CupInfo_slice* ComPcProcessSVC_impl::GetCupInfo()
 {
-	std::thread::id ThreadId = std::this_thread::get_id();
-	std::cout << "###### GetCupInfo() Thread ID:" << ThreadId << std::endl;
-
-	ComPcProcess::CupInfo* tmp = new ComPcProcess::CupInfo[5];
+	ComPcProcessSVC_impl::Result_CupInfo = new ComPcProcess::CupInfo[5];
 	for(int i = 0;i < 5;i++)
 		for(int j = 0;j < 7;j++)
-			(*tmp)[i][j] = (CORBA::Double)(i * 3);
+			(*ComPcProcessSVC_impl::Result_CupInfo)[i][j] = (CORBA::Double)(i * 3);
 
-	return (*tmp);
+	return (*ComPcProcessSVC_impl::Result_CupInfo);
 }

@@ -140,55 +140,47 @@ Eigen::Matrix4f MakeTransformMatrix(double Data[4][4])
 
 PCXYZ_Ptr Filters(PCXYZ_Ptr Source, PCXYZ_Ptr Output)
 {
-#pragma region 各个滤波器变量声明，以及滤波器设置
-	//
+	//////// Settings of PassFilter
 	pcl::PassThrough<pcl::PointXYZ> PassFilter;
 	PassFilter.setFilterFieldName("z");
 	PassFilter.setFilterLimits(0.020, 0.50);
 
-	//
-	pcl::VoxelGrid<pcl::PointXYZ> VoxelGrid_sor;//新声明体素网格对象
-	VoxelGrid_sor.setLeafSize(0.005f, 0.005f, 0.005f);//设定体素网格大小
-	//
+	//////// Settings of PassFilter
+	pcl::VoxelGrid<pcl::PointXYZ> VoxelGrid_sor;
+	VoxelGrid_sor.setLeafSize(0.005f, 0.005f, 0.005f);//Set the size of VoxelGrid.
+
+	//////// Settings of BilateraFilter
 	pcl::FastBilateralFilter<pcl::PointXYZ> fbf;
 	fbf.setSigmaS(1);
 	fbf.setSigmaR(0.02);
-	//
-	pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;//Removing outliers using a StatisticalOutlierRemoval filter
+
+	//////// Settings of StatisticalOutlierRemover
+	pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
 	sor.setMeanK(50);
 	sor.setStddevMulThresh(0.6);
-#pragma endregion
 
-	/*===============各个滤波器之间的临时变量================*/
+	//////// Temporary variables for this function.
 	PCXYZ_Ptr tmp(new PCXYZ);
 	PCXYZ_Ptr tmp2(new PCXYZ);
 	PCXYZ_Ptr tmp3(new PCXYZ);
-	PCXYZ_Ptr tmp4(new PCXYZ);
-	/*===============Z轴限定范围================*/
 
-	/*======双边滤波器FastBilateralFilter======*/
-std::cout << "Filter!" << (*Source).height << std::endl;
+	//////// Do the FastBilateralFilter.
 	CovertTo_OrgnizedPointCloud(Source, 640, 480);
-std::cout << "Filter!" << (*Source).height << "...Size:" << (*Source).size() << std::endl;
 	fbf.setInputCloud(Source);
 	fbf.filter(*tmp);
 	CovertTo_UnOrgnizedPointCloud(tmp);
-	/*======双边滤波器FastBilateralFilter======*/
 
-	/*============<<<体素网格滤波================*/
+	//////// Do the VoxelGrid filter.
 	VoxelGrid_sor.setInputCloud(tmp);
-	VoxelGrid_sor.filter(*tmp2);//过滤点云
-	/*===============体素网格滤波>>>=============*/
+	VoxelGrid_sor.filter(*tmp2);
 
-	/*============<<<带通滤波器================*/ //Source->tmp
+	//////// Do the Pass filter.
 	PassFilter.setInputCloud(tmp2);
 	PassFilter.filter(*tmp3);
-	/*======END======带通滤波器>>>====END======*/
 
-	/*===============去除极值================*/
+	//////// Do the
 	sor.setInputCloud(tmp3);
 	sor.filter(*Output);
-	/*===============去除极值================*/
 
 	return Output;
 }
@@ -215,34 +207,33 @@ void CovertTo_UnOrgnizedPointCloud(PCXYZ_Ptr &Source)
 
 void ExtractPlane(PCXYZ_Ptr Source, PCXYZ_Ptr Plane, PCXYZ_Ptr Rest)//抽出平面，Rest去除平面后的点云；返回值是抽出的平面。
 {
-	pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
-	pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
-	// Create the segmentation object
-	pcl::SACSegmentation<pcl::PointXYZ> seg;
-	// Optional
+	pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);// Coefficients for extracted model.
+	pcl::PointIndices::Ptr inliers(new pcl::PointIndices);// points of extracted model.
+	pcl::SACSegmentation<pcl::PointXYZ> seg;// Create the segmentation(Plane extract) object
+	pcl::ExtractIndices<pcl::PointXYZ> extract;//For converting pcl::PointIndices to PointCloud
+
+	//////// Settings of SACSegmentation.
 	seg.setOptimizeCoefficients(true);
-	// Mandatory
 	seg.setModelType(pcl::SACMODEL_PLANE);
 	seg.setMethodType(pcl::SAC_RANSAC);
 	seg.setDistanceThreshold(0.02);
 
+	//////// Do extract.
 	seg.setInputCloud(Source);
 	seg.segment(*inliers, *coefficients);
 
+
+	//////// Output process
 	if (inliers->indices.size() == 0)
 		PCL_ERROR("Could not estimate a planar model for the given dataset.");
-
-	//输出处理
-	pcl::ExtractIndices<pcl::PointXYZ> extract;//由于SACSegmentation抽出来的只是点的数值，需要将数值转化为点云。这个类便是专门来干这个的。
 	extract.setInputCloud(Source);
 	extract.setIndices(inliers);
 	extract.setNegative(false);
-	// Get the points associated with the planar surface
-	extract.filter(*Plane);
-	// Remove the planar inliers, extract the rest
+	extract.filter(*Plane);// Get the points associated with the planar surface.
 	extract.setNegative(true);
-	extract.filter(*Rest);
+	extract.filter(*Rest);// Remove the planar inliers, extract the rest.
 }
+
 int ExtractEuclideanCluster(PCXYZ_Ptr Source, PCXYZ_Ptr Clusters[])
 {
 	// Creating the KdTree object for the search method of the extraction
@@ -271,6 +262,7 @@ int ExtractEuclideanCluster(PCXYZ_Ptr Source, PCXYZ_Ptr Clusters[])
 	}
 	return cluster_indices.size();
 }
+
 Mat4f ICP_Single(PCXYZ_Ptr Source, PCXYZ_Ptr Target, PCXYZ_Ptr Output)
 {
 	pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
@@ -281,7 +273,7 @@ Mat4f ICP_Single(PCXYZ_Ptr Source, PCXYZ_Ptr Target, PCXYZ_Ptr Output)
 
 	icp.setMaximumIterations(300);
 	icp.setInputSource(Source);
-	icp.setInputTarget(Target);//这个点云不动，其他点云跟Target配合。ptr_To_ICP_cloud[0]
+	icp.setInputTarget(Target);//这个点云不动，其他点云跟Target配合。
 	icp.align(*Output);
 
 	if (icp.hasConverged())

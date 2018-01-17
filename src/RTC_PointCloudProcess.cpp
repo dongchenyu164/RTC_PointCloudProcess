@@ -202,50 +202,45 @@ void Transform_PointCloud()
 		return;
 	}
 
-	std::cout << "Transform_PointCloud() Start to process!" << std::endl;
+	std::cout << "#################################################" << std::endl;
+	std::cout << "#----Entering Transform_PointCloud() process----#" << std::endl;
+	std::cout << "#################################################" << std::endl;
 
 	PCXYZ_Ptr tmp(new PCXYZ);
 	PCXYZ_Ptr tmp2(new PCXYZ);
 	PCXYZ_Ptr tmp3(new PCXYZ);
-	PCXYZ_Ptr tmp4(new PCXYZ);
-std::cout << "Transform_PointCloud() size of tranform:" << ComPcProcessSVC_impl::queue_PointsOfCapture.front().size() << std::endl;
-for(int i = 0;i < 4;i++)
-{
-	for(int j = 0;j < 4;j++)
-		std::cout << " " << (ComPcProcessSVC_impl::queue_TransformData.front())(i,j);
-	 std::cout <<std::endl;
-}
-char a=0;
-std::cin>>a;
-	PCXYZ Points(ComPcProcessSVC_impl::queue_PointsOfCapture.front());
-	//pcl::copyPointCloud(ComPcProcessSVC_impl::queue_PointsOfCapture.front(), Points);
-	Eigen::Matrix4f Mats(ComPcProcessSVC_impl::queue_TransformData.front());
-std::cin>>a;
-	Filters(Points.makeShared(), tmp);
-std::cin>>a;
-	//(*tmp) = Points;
-	pcl::transformPointCloud(*tmp, *tmp2, Mats);
-std::cin>>a;
-	std::cout << "Transform_PointCloud() Start to PopQueue!" << std::endl;
 
-	//调用完后弹出队列
+	///////// Read data from two queues.
+	PCXYZ Points(ComPcProcessSVC_impl::queue_PointsOfCapture.front());
+	Eigen::Matrix4f Mats(ComPcProcessSVC_impl::queue_TransformData.front());
+
+	///////// Use filter to ...
+	std::cout << "Transform_PointCloud() Start to Filter!" << std::endl;
+	Filters(Points.makeShared(), tmp);
+
+	///////// Transform the pointcloud.
+	std::cout << "Transform_PointCloud() Start to transformPointCloud()!" << std::endl;
+	pcl::transformPointCloud(*tmp, *tmp2, Mats);
+
+	///////// Pop the first element of queue.
+	std::cout << "Transform_PointCloud() Start to PopQueue!" << std::endl;
 	ComPcProcessSVC_impl::queue_PointsOfCapture.pop();
 	ComPcProcessSVC_impl::queue_TransformData.pop();
+	ComPcProcessSVC_impl::QueueMutex.unlock();
 
-	ComPcProcessSVC_impl::QueueMutex.unlock();//关闭忙标志，使能队列操作。
-	std::cout << "Transform_PointCloud() Start to Filter!" << std::endl;
-
-	//Filters(tmp, tmp2);
+	///////// ICP
 	std::cout << "Transform_PointCloud() Start to ICP!" << std::endl;
-
-	//ICP
 	if ((*ComPcProcessSVC_impl::PointsOfTable).size() != 0)
 		ICP_Single(tmp2, ComPcProcessSVC_impl::PointsOfTable, tmp3);
 	else
 		tmp3 = tmp2;
-	std::cout << "Transform_PointCloud() End of ICP!" << std::endl;
 
-	(*ComPcProcessSVC_impl::PointsOfTable) += (*tmp3);//累加点云
+	///////// Accumulate pointcloud.
+	(*ComPcProcessSVC_impl::PointsOfTable) += (*tmp3);
+
+	std::cout << "#################################################" << std::endl;
+	std::cout << "#+++++LEAVING Transform_PointCloud() process++++#" << std::endl;
+	std::cout << "#################################################" << std::endl;
 }
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 //**Edit by Dong. (END)

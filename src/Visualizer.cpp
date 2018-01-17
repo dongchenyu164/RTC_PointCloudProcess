@@ -56,46 +56,23 @@ void PointCloud_Visualizator_Stuck(pcl::PointCloud<pcl::PointXYZ> Data[], int Nu
 
 void VisualizationProcess_PCXYZ(pcl::PointCloud<pcl::PointXYZ>::Ptr Data)
 {
-//	pcl::visualization::PCLVisualizer viewertest("3D Viewer Test");
-
-//	pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> ColorHandler(Data, 255, 0, 0);//orange
-//	viewertest.addPointCloud(Data, ColorHandler, "Cloud");
-
-//	viewertest.setBackgroundColor(0.1, 0.1, 0.1, 0);
-
-//	while (!viewertest.wasStopped())
-//	{
-//		std::this_thread::sleep_for(std::chrono::milliseconds(13));
-//		if (mtx.try_lock())
-//		{
-//			viewertest.spinOnce(5);
-//			mtx.unlock();
-//		}
-//	}
-//	//viewertest.close();
-//	viewertest.close();
-
-	boost::shared_ptr<pcl::visualization::PCLVisualizer> viewertest(new pcl::visualization::PCLVisualizer("3D Viewer Test"));
+	pcl::visualization::PCLVisualizer viewertest("3D Viewer Test");
 
 	pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> ColorHandler(Data, 255, 0, 0);//orange
-	viewertest->addPointCloud(Data, ColorHandler, "Cloud");
+	viewertest.addPointCloud(Data, ColorHandler, "Cloud");
 
-	viewertest->setBackgroundColor(0.1, 0.1, 0.1, 0);
+	viewertest.setBackgroundColor(0.1, 0.1, 0.1, 0);
 
-	while (!viewertest->wasStopped())
+	while (!viewertest.wasStopped())
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(13));
 		if (mtx.try_lock())
 		{
-			viewertest->spinOnce(5);
+			viewertest.spinOnce(5);
 			mtx.unlock();
 		}
 	}
-	//viewertest.close();
-	viewertest->close();
-
-std::cout << "window close." << std::endl;
-	//viewertest.~PCLVisualizer();
+	viewertest.close();
 }
 void VisualizationProcess_PCXYZ_Array(pcl::PointCloud<pcl::PointXYZ>::Ptr Data[], int NumOfData)
 {
@@ -128,10 +105,7 @@ pcl::PointXYZRGB HSV2RGB(double H, double S, double V, double RangeH, double Ran
 {
 	pcl::PointXYZRGB Res;
 	int Hi = 0.0;
-	int R = 0, G = 0, B = 0;
-	if (S == 0)
-		R = G = B = V;
-	else
+	if (S != 0)
 	{
 		H /= 60.0;
 		Hi = (int)H % 6;
