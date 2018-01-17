@@ -35,6 +35,7 @@
 #include "pcProcessPortSVC_impl.h"
 
 void Transform_PointCloud();
+void PointCloud_Process();
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 //**Edit by Dong. (END)
 //*******************************************************
@@ -165,6 +166,7 @@ RTC::ReturnCode_t RTC_PointCloudProcess::onExecute(RTC::UniqueId ec_id) {
 
 		}
 	}
+
 	//*******************************************************
 	//**Edit by Dong.
 	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -174,7 +176,10 @@ RTC::ReturnCode_t RTC_PointCloudProcess::onExecute(RTC::UniqueId ec_id) {
 		Transform_PointCloud();
 	}
 	else
-		std::cout << "###### onExecute. Process Mode!" << std::endl;
+	{
+		//std::cout << "###### onExecute. Process Mode!" << std::endl;
+		PointCloud_Process();
+	}
 	//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	//**Edit by Dong. (END)
 	//*******************************************************
@@ -202,9 +207,9 @@ void Transform_PointCloud()
 		return;
 	}
 
-	std::cout << "#################################################" << std::endl;
-	std::cout << "#----Entering Transform_PointCloud() process----#" << std::endl;
-	std::cout << "#################################################" << std::endl;
+	std::cout << "#########################################" << std::endl;
+	std::cout << "#----Entering Transform_PointCloud()----#" << std::endl;
+	std::cout << "#########################################" << std::endl;
 
 	PCXYZ_Ptr tmp(new PCXYZ);
 	PCXYZ_Ptr tmp2(new PCXYZ);
@@ -241,6 +246,36 @@ void Transform_PointCloud()
 	std::cout << "#################################################" << std::endl;
 	std::cout << "#+++++LEAVING Transform_PointCloud() process++++#" << std::endl;
 	std::cout << "#################################################" << std::endl;
+}
+
+void PointCloud_Process()
+{
+	if (ComPcProcessSVC_impl::SystemMode != ComPcProcessSVC_impl::Process)
+		return;
+
+	std::cout << "#######################################" << std::endl;
+	std::cout << "#----Entering PointCloud_Process()----#" << std::endl;
+	std::cout << "#######################################" << std::endl;
+
+	PCXYZ_Ptr tmp(new PCXYZ);
+	PCXYZ_Ptr tmp2(new PCXYZ);
+	PCXYZ_Ptr tmp3(new PCXYZ);
+	PCXYZ_Ptr SegmentRes[10];
+
+	for(int i = 0; i < 10; i++)
+		SegmentRes[i] = PCXYZ_Ptr(new PCXYZ);
+
+	//////// Extract max plane in the pointcloud. We use the rest of pointcloud. And send it to SEGMENTATION.
+	ExtractPlane(ComPcProcessSVC_impl::PointsOfTable,PCXYZ_Ptr(new PCXYZ),tmp);
+
+	//////// Segment the things on the table.
+	int NumOfSegments = ExtractEuclideanCluster(tmp, SegmentRes);
+
+
+
+	std::cout << "###############################################" << std::endl;
+	std::cout << "#+++++LEAVING PointCloud_Process() process++++#" << std::endl;
+	std::cout << "###############################################" << std::endl;
 }
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 //**Edit by Dong. (END)
