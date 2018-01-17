@@ -278,7 +278,7 @@ Mat4f ICP_Single(PCXYZ_Ptr Source, PCXYZ_Ptr Target, PCXYZ_Ptr Output)
 
 	if (icp.hasConverged())
 	{
-		std::cout << "ICP has converged, score is " << icp.getFitnessScore();
+		std::cout << "ICP has converged, score is " << icp.getFitnessScore() << std::endl;
 		pcl::transformPointCloud(*Source, *Output, icp.getFinalTransformation());
 		return icp.getFinalTransformation();
 	}

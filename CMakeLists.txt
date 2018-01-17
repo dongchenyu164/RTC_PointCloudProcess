@@ -12,6 +12,7 @@ set(PROJECT_DESCRIPTION "ModuleDescription")
 set(PROJECT_VENDOR "Keisuke Nagano")
 set(PROJECT_AUTHOR "Keisuke Nagano")
 set(PROJECT_AUTHOR_SHORT "Keisuke Nagano")
+set(CMAKE_CXX_FLAGS "-g")
 
 # Add an "uninstall" target
 CONFIGURE_FILE ("${PROJECT_SOURCE_DIR}/cmake/uninstall_target.cmake.in"

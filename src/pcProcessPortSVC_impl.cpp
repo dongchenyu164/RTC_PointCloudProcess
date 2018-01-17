@@ -248,10 +248,5 @@ char* ComPcProcessSVC_impl::Clear_QueueAndPoints()
 
 ComPcProcess::CupInfo_slice* ComPcProcessSVC_impl::GetCupInfo()
 {
-	ComPcProcessSVC_impl::Result_CupInfo = new ComPcProcess::CupInfo[ComPcProcess::LENGTH_OF_CUPINFO];
-	for(int i = 0;i < ComPcProcess::LENGTH_OF_CUPINFO;i++)
-		for(int j = 0;j < ComPcProcess::DATA_LENGTH_OF_CUPINFO;j++)
-		(*ComPcProcessSVC_impl::Result_CupInfo)[i][j] = (CORBA::Double)(i * 3);
-
 	return (*ComPcProcessSVC_impl::Result_CupInfo);
 }

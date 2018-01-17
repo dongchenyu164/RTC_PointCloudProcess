@@ -271,7 +271,7 @@ void PointCloud_Process()
 	//////// Segment the things on the table.
 	int NumOfSegments = ExtractEuclideanCluster(tmp, SegmentRes);
 
-
+	PointCloud_Visualizator_Stuck(SegmentRes,NumOfSegments);
 
 	std::cout << "###############################################" << std::endl;
 	std::cout << "#+++++LEAVING PointCloud_Process() process++++#" << std::endl;
